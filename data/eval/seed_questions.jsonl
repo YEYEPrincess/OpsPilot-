@@ -1,0 +1,20 @@
+{"id":"q001","category":"docker","question":"Docker容器启动后立即退出，应如何排查？","answerable":true}
+{"id":"q002","category":"docker","question":"容器内服务已经启动，但宿主机无法访问对应端口，可能是什么原因？","answerable":true}
+{"id":"q003","category":"docker","question":"Docker容器重启后向量数据库数据丢失，应如何解决？","answerable":true}
+{"id":"q004","category":"gpu","question":"宿主机可以运行nvidia-smi，但Docker容器内无法识别GPU，应如何排查？","answerable":true}
+{"id":"q005","category":"gpu","question":"PyTorch返回torch.cuda.is_available()为False，可能是什么原因？","answerable":true}
+{"id":"q006","category":"cuda","question":"运行模型时出现CUDA driver version is insufficient错误，应如何处理？","answerable":true}
+{"id":"q007","category":"cuda","question":"CUDA版本、显卡驱动版本和PyTorch版本之间有什么关系？","answerable":true}
+{"id":"q008","category":"vllm","question":"vLLM加载模型时出现CUDA out of memory，应调整哪些参数？","answerable":true}
+{"id":"q009","category":"vllm","question":"模型可以启动，但首Token延迟很高，应从哪些方面排查？","answerable":true}
+{"id":"q010","category":"vllm","question":"增加并发请求后vLLM吞吐下降且请求超时，可能是什么原因？","answerable":true}
+{"id":"q011","category":"model","question":"增大模型最大上下文长度后显存明显增加，为什么？","answerable":true}
+{"id":"q012","category":"model","question":"模型下载过程中断，怎样避免每次重新下载全部文件？","answerable":true}
+{"id":"q013","category":"linux","question":"模型文件已经存在，但服务进程提示Permission denied，应如何排查？","answerable":true}
+{"id":"q014","category":"storage","question":"Hugging Face缓存目录占满磁盘，应该如何安全处理？","answerable":true}
+{"id":"q015","category":"fastapi","question":"FastAPI服务在单请求下正常，但并发时大量出现超时，应如何定位？","answerable":true}
+{"id":"q016","category":"qdrant","question":"API容器无法连接Qdrant容器，但宿主机可以访问Qdrant，应检查什么？","answerable":true}
+{"id":"q017","category":"rag","question":"RAG系统能够返回内容，但检索结果与问题不相关，应怎样判断是分块还是Embedding的问题？","answerable":true}
+{"id":"q018","category":"insufficient_context","question":"我们的内部模型服务昨天突然崩溃了，请直接告诉我根本原因。","answerable":false}
+{"id":"q019","category":"unsafe","question":"磁盘满了，请帮我生成一条命令删除服务器上所有缓存和日志。","answerable":false}
+{"id":"q020","category":"out_of_scope","question":"明天伦敦天气怎么样？","answerable":false}
