@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-08-04T11:26:28.133644+00:00",
+  "catalog_entries": 44,
+  "successful": 44,
+  "failed_or_flagged": 0,
+  "products": {
+    "docker": 8,
+    "fastapi": 6,
+    "kubernetes": 7,
+    "nvidia-container-toolkit": 5,
+    "pytorch": 5,
+    "qdrant": 6,
+    "vllm": 7
+  },
+  "http_statuses": {
+    "200": 44
+  },
+  "exact_duplicates": 0,
+  "text_duplicates": 0,
+  "encoding_replacement_characters": 0,
+  "suspected_secret_pattern_hits": 0,
+  "review_required_licenses": 8,
+  "failed_document_ids": []
+}

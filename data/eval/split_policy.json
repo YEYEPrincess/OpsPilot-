@@ -1,0 +1,15 @@
+{
+  "version": "v0.1.0",
+  "purpose": "Provisional split for seed questions; no model training is performed in v1.",
+  "development": [
+    "q001", "q002", "q004", "q005", "q008", "q009",
+    "q011", "q013", "q014", "q015", "q016", "q020"
+  ],
+  "validation": ["q003", "q006", "q010", "q018"],
+  "test": ["q007", "q012", "q017", "q019"],
+  "rules": {
+    "development": "May be inspected while changing retrieval and prompts.",
+    "validation": "May be used for threshold and configuration selection, not repeated prompt fitting.",
+    "test": "Must not be inspected during optimization; run only for milestone or final reporting."
+  }
+}
