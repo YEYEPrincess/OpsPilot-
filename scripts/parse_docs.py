@@ -1,4 +1,8 @@
-"""Parse raw documentation and produce normalized documents and chunks."""
+"""离线文档 ETL：把原始 HTML/Markdown/PDF/TXT 转成标准文档和 Chunk。
+
+输入：download_report.csv 中下载成功的本地快照。
+输出：标准化 documents.jsonl、两种分块 JSONL，以及 parse_stats.json。
+"""
 
 from __future__ import annotations
 
@@ -17,6 +21,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
+# 项目根目录；所有默认输入输出都相对于这里，便于本地和服务器复现。
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = ROOT / "data" / "manifest" / "source_catalog.csv"
 DEFAULT_REPORT = ROOT / "data" / "manifest" / "download_report.csv"
@@ -25,8 +30,11 @@ DEFAULT_FIXED = ROOT / "data" / "processed" / "chunks_fixed.jsonl"
 DEFAULT_SECTION = ROOT / "data" / "processed" / "chunks_section.jsonl"
 DEFAULT_STATS = ROOT / "data" / "manifest" / "parse_stats.json"
 
+# Markdown 标题模式：匹配 1~6 个 #，并捕获标题文字。
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
+# HTML 中可作为正文块的标签；h1~h6 会作为章节标题处理。
 BLOCK_TAGS = {"p", "li", "pre", "blockquote", "dt", "dd", "td", "th"}
+# 导航、脚本和页面装饰不应进入知识库正文。
 SKIP_TAGS = {"script", "style", "nav", "footer", "header", "aside", "svg", "noscript"}
 
 
@@ -39,6 +47,7 @@ class ParsedDocument:
 
 
 def parse_args() -> argparse.Namespace:
+    """定义命令行参数，允许部署时替换输入、输出和分块参数。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
@@ -53,7 +62,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def clean_text(text: str) -> str:
-    """Normalize Unicode, remove controls, and collapse whitespace."""
+    """清洗文本，降低网页排版和编码差异对检索的影响。"""
     text = unicodedata.normalize("NFKC", text).replace("\xa0", " ")
     text = text.replace("\u200b", "").replace("\ufeff", "")
     text = "".join(
@@ -64,6 +73,7 @@ def clean_text(text: str) -> str:
 
 
 def text_hash(text: str) -> str:
+    """对清洗后的大小写不敏感文本计算 SHA-256。"""
     normalized = re.sub(r"\s+", " ", clean_text(text)).strip().lower()
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
@@ -82,6 +92,7 @@ def append_block(
 
 
 def parse_html(raw: bytes) -> tuple[str, list[dict[str, Any]]]:
+    """解析 HTML，返回页面标题和带 heading_path 的正文章节。"""
     soup = BeautifulSoup(raw, "html.parser")
     title = clean_text(soup.title.get_text(" ", strip=True)) if soup.title else ""
     for tag in soup.find_all(SKIP_TAGS):
@@ -103,12 +114,14 @@ def parse_html(raw: bytes) -> tuple[str, list[dict[str, Any]]]:
 
 
 def parse_markdown(raw: bytes) -> tuple[str, list[dict[str, Any]]]:
+    """解析 Markdown；代码围栏内的 # 不当作章节标题。"""
     text = raw.decode("utf-8", errors="replace")
     lines = text.splitlines()
     title = ""
     groups: list[dict[str, Any]] = []
     heading_stack: list[str] = []
     block: list[str] = []
+    # 小状态机：遇到 ``` 在“代码中/代码外”两种状态间切换。
     in_fence = False
 
     def flush() -> None:
@@ -140,6 +153,7 @@ def parse_markdown(raw: bytes) -> tuple[str, list[dict[str, Any]]]:
 
 
 def parse_pdf(path: Path) -> tuple[str, list[dict[str, Any]]]:
+    """按页解析 PDF，并保留页码来源。"""
     reader = PdfReader(str(path))
     groups: list[dict[str, Any]] = []
     for page_number, page in enumerate(reader.pages, start=1):
@@ -148,6 +162,7 @@ def parse_pdf(path: Path) -> tuple[str, list[dict[str, Any]]]:
 
 
 def deduplicate_sections(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """删除清洗后正文相同的章节，并保存章节级哈希。"""
     seen: set[str] = set()
     unique: list[dict[str, Any]] = []
     for index, section in enumerate(sections):
@@ -168,6 +183,7 @@ def deduplicate_sections(sections: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 def load_rows(catalog_path: Path, report_path: Path) -> list[dict[str, str]]:
+    """合并目录和下载报告，只返回没有错误的可解析文件。"""
     with catalog_path.open(encoding="utf-8-sig", newline="") as handle:
         catalog = {row["document_id"]: row for row in csv.DictReader(handle)}
     with report_path.open(encoding="utf-8-sig", newline="") as handle:
@@ -182,6 +198,7 @@ def load_rows(catalog_path: Path, report_path: Path) -> list[dict[str, str]]:
 
 
 def parse_one(row: dict[str, str]) -> ParsedDocument:
+    """解析一个文件，建立章节和文档级元数据。"""
     local_path = ROOT / row["local_path"]
     raw = local_path.read_bytes()
     suffix = local_path.suffix.lower()
@@ -277,6 +294,7 @@ def make_chunk(
 
 
 def fixed_chunks(document: ParsedDocument, target: int, overlap: int) -> list[dict[str, Any]]:
+    """整篇文档滑动窗口切分，步长等于 target 减 overlap。"""
     text, spans = section_segments(document)
     if not text:
         return []
@@ -295,6 +313,7 @@ def fixed_chunks(document: ParsedDocument, target: int, overlap: int) -> list[di
 
 
 def section_chunks(document: ParsedDocument, target: int, overlap: int) -> list[dict[str, Any]]:
+    """先按章节切分，超长章节再使用滑动窗口。"""
     chunks: list[dict[str, Any]] = []
     step = max(1, target - overlap)
     index = 0
@@ -310,6 +329,7 @@ def section_chunks(document: ParsedDocument, target: int, overlap: int) -> list[
 
 
 def write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
+    """先写临时 JSONL，再原子替换，避免中断留下半文件。"""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
@@ -358,6 +378,7 @@ def summarize(
 
 
 def main() -> int:
+    """执行读取、解析、分块、写文件和统计的离线流水线。"""
     args = parse_args()
     rows = load_rows(args.catalog, args.report)
     existing: dict[str, dict[str, Any]] = {}
