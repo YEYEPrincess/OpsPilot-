@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-04T11:26:28.133644+00:00",
+  "generated_at": "2026-08-06T16:16:18.816682+00:00",
   "catalog_entries": 44,
-  "successful": 44,
-  "failed_or_flagged": 0,
+  "successful": 43,
+  "failed_or_flagged": 1,
   "products": {
     "docker": 8,
     "fastapi": 6,
@@ -13,12 +13,16 @@
     "vllm": 7
   },
   "http_statuses": {
-    "200": 44
+    "200": 43,
+    "429": 1
   },
   "exact_duplicates": 0,
   "text_duplicates": 0,
   "encoding_replacement_characters": 0,
   "suspected_secret_pattern_hits": 0,
   "review_required_licenses": 8,
-  "failed_document_ids": []
+  "local_snapshot_reuse": 6,
+  "failed_document_ids": [
+    "vllm-003"
+  ]
 }

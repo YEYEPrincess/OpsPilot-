@@ -210,7 +210,10 @@ async def collect_one(
 
         product_dir = raw_dir / row["product"]
         product_dir.mkdir(parents=True, exist_ok=True)
-        suffix = ".html" if "html" in result["content_type"].lower() else ".txt"
+        content_type = result["content_type"].lower()
+        suffix = (
+            ".html" if "html" in content_type else ".md" if "markdown" in content_type else ".txt"
+        )
         output_path = product_dir / f"{row['document_id']}{suffix}"
         output_path.write_bytes(content)
 

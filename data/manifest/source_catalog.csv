@@ -12,14 +12,14 @@ nvidia-002,nvidia-container-toolkit,verification,Run a sample GPU workload,https
 nvidia-003,nvidia-container-toolkit,docker,Docker runtime configuration,https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/docker-specialized.html,official_docs,en,Apache-2.0,https://github.com/NVIDIA/nvidia-container-toolkit,local_snapshot_only,true
 nvidia-004,nvidia-container-toolkit,troubleshooting,Troubleshooting NVIDIA Container Toolkit,https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/troubleshooting.html,official_docs,en,Apache-2.0,https://github.com/NVIDIA/nvidia-container-toolkit,local_snapshot_only,true
 nvidia-005,nvidia-container-toolkit,architecture,Architecture overview,https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/arch-overview.html,official_docs,en,Apache-2.0,https://github.com/NVIDIA/nvidia-container-toolkit,local_snapshot_only,true
-pytorch-001,pytorch,cuda,CUDA semantics,https://docs.pytorch.org/docs/stable/notes/cuda.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
-pytorch-002,pytorch,cuda,torch.cuda.is_available,https://docs.pytorch.org/docs/stable/generated/torch.cuda.is_available.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
-pytorch-003,pytorch,reproducibility,Reproducibility,https://docs.pytorch.org/docs/stable/notes/randomness.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
-pytorch-004,pytorch,serialization,Serialization semantics,https://docs.pytorch.org/docs/stable/notes/serialization.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
+pytorch-001,pytorch,cuda,CUDA semantics,https://docs.pytorch.org/docs/2.13/notes/cuda.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
+pytorch-002,pytorch,cuda,torch.cuda.is_available,https://docs.pytorch.org/docs/2.13/generated/torch.cuda.is_available.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
+pytorch-003,pytorch,reproducibility,Reproducibility,https://docs.pytorch.org/docs/2.13/notes/randomness.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
+pytorch-004,pytorch,serialization,Serialization semantics,https://docs.pytorch.org/docs/2.13/notes/serialization.html,official_docs,en,BSD-3-Clause,https://github.com/pytorch/docs,local_snapshot_only,true
 pytorch-005,pytorch,installation,Start locally with PyTorch,https://pytorch.org/get-started/locally/,official_docs,en,BSD-3-Clause,https://github.com/pytorch/pytorch/blob/main/LICENSE,local_snapshot_only,true
 vllm-001,vllm,installation,GPU installation,https://docs.vllm.ai/en/latest/getting_started/installation/gpu/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
 vllm-002,vllm,quickstart,Quickstart,https://docs.vllm.ai/en/latest/getting_started/quickstart/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
-vllm-003,vllm,serving,OpenAI-compatible server,https://docs.vllm.ai/en/latest/serving/openai_compatible_server/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
+vllm-003,vllm,serving,OpenAI-compatible server,https://docs.vllm.ai/en/latest/serving/online_serving/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
 vllm-004,vllm,memory,Conserving memory,https://docs.vllm.ai/en/latest/configuration/conserving_memory/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
 vllm-005,vllm,quantization,Quantization,https://docs.vllm.ai/en/latest/features/quantization/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
 vllm-006,vllm,distributed,Data parallel deployment,https://docs.vllm.ai/en/stable/serving/data_parallel_deployment/,official_docs,en,Apache-2.0,https://github.com/vllm-project/vllm,local_snapshot_only,true
@@ -43,4 +43,5 @@ k8s-004,kubernetes,resources,Resource management for pods and containers,https:/
 k8s-005,kubernetes,health,Liveness readiness and startup probes,https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/,official_docs,en,CC-BY-4.0,https://github.com/kubernetes/website,local_snapshot_only,true
 k8s-006,kubernetes,storage,Persistent volumes,https://kubernetes.io/docs/concepts/storage/persistent-volumes/,official_docs,en,CC-BY-4.0,https://github.com/kubernetes/website,local_snapshot_only,true
 k8s-007,kubernetes,images,Container images,https://kubernetes.io/docs/concepts/containers/images/,official_docs,en,CC-BY-4.0,https://github.com/kubernetes/website,local_snapshot_only,true
+
 

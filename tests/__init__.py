@@ -1,2 +1,1 @@
 """OpsPilot automated tests."""
-

@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-08-06T16:14:13.713982+00:00",
+  "chunk_chars": 1600,
+  "overlap_chars": 240,
+  "documents_ok": 43,
+  "documents_failed": 0,
+  "sections": 765,
+  "fixed_chunks": 688,
+  "section_chunks": 1042,
+  "chunk_char_min": 25,
+  "chunk_char_max": 1600,
+  "chunk_char_median": 1583.0,
+  "products": {
+    "docker": {
+      "documents": 8,
+      "sections": 125,
+      "fixed_chunks": 105,
+      "section_chunks": 164
+    },
+    "fastapi": {
+      "documents": 6,
+      "sections": 85,
+      "fixed_chunks": 60,
+      "section_chunks": 99
+    },
+    "kubernetes": {
+      "documents": 7,
+      "sections": 218,
+      "fixed_chunks": 149,
+      "section_chunks": 253
+    },
+    "nvidia-container-toolkit": {
+      "documents": 5,
+      "sections": 47,
+      "fixed_chunks": 36,
+      "section_chunks": 57
+    },
+    "pytorch": {
+      "documents": 5,
+      "sections": 107,
+      "fixed_chunks": 113,
+      "section_chunks": 171
+    },
+    "qdrant": {
+      "documents": 6,
+      "sections": 108,
+      "fixed_chunks": 146,
+      "section_chunks": 193
+    },
+    "vllm": {
+      "documents": 6,
+      "sections": 75,
+      "fixed_chunks": 79,
+      "section_chunks": 105
+    }
+  },
+  "failures": []
+}
