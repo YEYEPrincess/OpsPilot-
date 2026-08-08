@@ -1,0 +1,121 @@
+{
+  "metric": "category_product_hit@k",
+  "note": "Proxy smoke metric, not human-judged answer correctness.",
+  "questions": 10,
+  "status_ok": 10,
+  "category_product_hits": 8,
+  "hit_rate": 0.8,
+  "details": [
+    {
+      "seed_id": "q001",
+      "category": "docker",
+      "top_k": 5,
+      "products": [
+        "docker",
+        "kubernetes",
+        "vllm"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q002",
+      "category": "docker",
+      "top_k": 5,
+      "products": [
+        "qdrant",
+        "vllm"
+      ],
+      "category_product_hit": false,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q003",
+      "category": "docker",
+      "top_k": 5,
+      "products": [
+        "docker",
+        "fastapi",
+        "kubernetes"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q004",
+      "category": "gpu",
+      "top_k": 5,
+      "products": [
+        "nvidia-container-toolkit"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q005",
+      "category": "gpu",
+      "top_k": 5,
+      "products": [
+        "pytorch",
+        "vllm"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q006",
+      "category": "cuda",
+      "top_k": 5,
+      "products": [
+        "docker",
+        "nvidia-container-toolkit",
+        "pytorch",
+        "vllm"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q007",
+      "category": "cuda",
+      "top_k": 5,
+      "products": [
+        "pytorch"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q008",
+      "category": "vllm",
+      "top_k": 5,
+      "products": [
+        "docker",
+        "pytorch",
+        "vllm"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q009",
+      "category": "vllm",
+      "top_k": 5,
+      "products": [
+        "qdrant"
+      ],
+      "category_product_hit": false,
+      "status": "ok"
+    },
+    {
+      "seed_id": "q010",
+      "category": "vllm",
+      "top_k": 5,
+      "products": [
+        "vllm"
+      ],
+      "category_product_hit": true,
+      "status": "ok"
+    }
+  ]
+}
