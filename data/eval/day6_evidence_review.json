@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "scope": "Day 6 evidence annotation cross-check",
+  "records_checked": 60,
+  "answerable_checked": 42,
+  "evidence_items_checked": 57,
+  "relevance_counts": {
+    "direct": 42,
+    "supporting": 15
+  },
+  "checks": {
+    "chunk_ids_exist": true,
+    "expected_product_overlaps_evidence": true,
+    "no_duplicate_evidence_refs": true,
+    "answerable_has_evidence": true,
+    "unanswerable_has_no_evidence": true,
+    "annotation_status_reviewed": true,
+    "evidence_shape_valid": true
+  },
+  "errors": {
+    "missing_chunk_ids": [],
+    "product_mismatches": [],
+    "duplicate_evidence_refs": [],
+    "answerable_without_evidence": [],
+    "unanswerable_with_evidence": [],
+    "invalid_evidence_shape": [],
+    "unreviewed_records": []
+  },
+  "semantic_review_note": "结构检查通过不等于答案一定正确；仍需按问题、gold_points 与 evidence.text 逐条人工确认结论覆盖和引用边界。"
+}

@@ -1,0 +1,17 @@
+{
+  "version": "v1.0.0",
+  "total": 60,
+  "development": 36,
+  "validation": 12,
+  "test": 12,
+  "rules": {
+    "development": "允许用于调试检索参数、Prompt和分块策略。",
+    "validation": "用于选择最终配置，不用于反复修改单个问题答案。",
+    "test": "只用于里程碑或最终报告，优化过程中不反复查看。"
+  },
+  "stratification": [
+    "domain",
+    "case_type",
+    "answerability"
+  ]
+}
