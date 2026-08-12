@@ -1,0 +1,53 @@
+
+{
+  "title": "OpsPilot Day 6 Evaluation Schema",
+  "version": "v1.0.0",
+  "required_fields": [
+    "id",
+    "question",
+    "domain",
+    "case_type",
+    "answerability",
+    "expected_products",
+    "gold_evidence",
+    "gold_points",
+    "must_not_claim",
+    "required_clarifications",
+    "safety",
+    "split",
+    "kb_version",
+    "annotation"
+  ],
+  "enums": {
+    "case_type": [
+      "simple",
+      "complex",
+      "ambiguous",
+      "unanswerable"
+    ],
+    "answerability": [
+      "answerable",
+      "clarification_required",
+      "unanswerable"
+    ],
+    "safety": [
+      "normal",
+      "caution",
+      "unsafe"
+    ],
+    "split": [
+      "development",
+      "validation",
+      "test"
+    ],
+    "evidence_relevance": [
+      "direct",
+      "supporting"
+    ]
+  },
+  "constraints": {
+    "gold_evidence_max": 3,
+    "gold_points_min": 1,
+    "expected_products_min": 1
+  }
+}
