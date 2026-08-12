@@ -1,0 +1,104 @@
+{
+  "status": "ok",
+  "experiment": "day7-retrieval-baseline",
+  "records_total": 60,
+  "records_evaluated": 42,
+  "metrics": {
+    "1": {
+      "recall_at_k": 0.0952,
+      "hit_rate_at_k": 0.0952,
+      "mrr_at_k": 0.0952
+    },
+    "3": {
+      "recall_at_k": 0.1627,
+      "hit_rate_at_k": 0.1905,
+      "mrr_at_k": 0.1389
+    },
+    "5": {
+      "recall_at_k": 0.1865,
+      "hit_rate_at_k": 0.2143,
+      "mrr_at_k": 0.1437
+    },
+    "10": {
+      "recall_at_k": 0.2341,
+      "hit_rate_at_k": 0.2857,
+      "mrr_at_k": 0.1511
+    }
+  },
+  "by_split": {
+    "development": {
+      "1": {
+        "recall_at_k": 0.08,
+        "hit_rate_at_k": 0.08,
+        "mrr_at_k": 0.08
+      },
+      "3": {
+        "recall_at_k": 0.1733,
+        "hit_rate_at_k": 0.2,
+        "mrr_at_k": 0.14
+      },
+      "5": {
+        "recall_at_k": 0.2133,
+        "hit_rate_at_k": 0.24,
+        "mrr_at_k": 0.148
+      },
+      "10": {
+        "recall_at_k": 0.2933,
+        "hit_rate_at_k": 0.36,
+        "mrr_at_k": 0.1604
+      }
+    },
+    "test": {
+      "1": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "3": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "5": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "10": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      }
+    },
+    "validation": {
+      "1": {
+        "recall_at_k": 0.2222,
+        "hit_rate_at_k": 0.2222,
+        "mrr_at_k": 0.2222
+      },
+      "3": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      },
+      "5": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      },
+      "10": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      }
+    }
+  },
+  "error_summary": {
+    "analysis_k": 5,
+    "errors": 33,
+    "no_gold_in_top_k": 30,
+    "late_gold_rank": 3
+  },
+  "config_path": "data\\eval\\day7_experiment_config.json",
+  "errors_path": "data\\eval\\day7_retrieval_errors.jsonl"
+}

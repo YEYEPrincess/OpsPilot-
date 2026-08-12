@@ -1,0 +1,61 @@
+{
+  "experiment": "day7-retrieval-baseline",
+  "generated_at": "2026-08-12T15:11:52.876157+00:00",
+  "git_revision": "9eb1e8f423ff10f7626dc5fb7065a4e0350e1bd8",
+  "python": "3.11.15",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "qdrant_client": "1.19.0",
+  "retrieval_mode": "dense_vector_only",
+  "provider": {
+    "provider": "hash-v1",
+    "dimension": 384
+  },
+  "collection": "opspilot_chunks_fixed_v1",
+  "qdrant_path": "data\\index\\qdrant_day7_fixed",
+  "top_k": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "analysis_k": 5,
+  "data": {
+    "eval": {
+      "path": "data\\eval\\day6_eval.jsonl",
+      "bytes": 49845,
+      "sha256": "f9253b6245a063dfc6c77f2926864618d8cc606914713db01f6267b202cf3852"
+    },
+    "chunks": {
+      "path": "data\\processed\\chunks_fixed.jsonl",
+      "bytes": 1544273,
+      "sha256": "0d82ea9561cb32f26041f30f8497f331bb42eddd2ef6dfbc32d697364002cd73"
+    },
+    "gold_chunks": {
+      "path": "data\\processed\\chunks_section.jsonl",
+      "bytes": 1551833,
+      "sha256": "c55fdcb70ee7c51cb528b3501e63128a6b88e93461b884a6a0316244bb989794"
+    },
+    "vector_manifest": null,
+    "qdrant_storage": {
+      "path": "data\\index\\qdrant_day7_fixed\\collection\\opspilot_chunks_fixed_v1\\storage.sqlite",
+      "bytes": 4362240,
+      "sha256": "6efdc1ff72c567143a176cda97b93cf190278fb4aaa51350dfc347ac4268560b"
+    },
+    "chunk_summary": {
+      "strategy": "fixed",
+      "count": 688,
+      "min_chars": 253,
+      "max_chars": 1600,
+      "mean_chars": 1548.64
+    },
+    "gold_mapping": {
+      "mapped": 1042,
+      "total": 1042,
+      "strategy": "same-id or document_id + exact section_path"
+    }
+  },
+  "excluded_records": {
+    "total": 18,
+    "reason": "Only answerable records have gold evidence for retrieval metrics."
+  }
+}
