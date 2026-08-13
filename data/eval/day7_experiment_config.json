@@ -1,0 +1,42 @@
+{
+  "experiment": "day7-retrieval-baseline",
+  "generated_at": "2026-08-13T11:24:36.415275+00:00",
+  "git_revision": "10227f8e23f677e7996ad810d89b946e0194df20",
+  "python": "3.11.15",
+  "retrieval_mode": "dense_vector_only",
+  "embedding": {
+    "provider": "hash-v1",
+    "dimension": 384,
+    "model": null,
+    "device": "cpu"
+  },
+  "qdrant": {
+    "path": "data\\index\\qdrant",
+    "collection": "opspilot_chunks_v1"
+  },
+  "top_k": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "analysis_k": 5,
+  "data": {
+    "eval": {
+      "path": "data\\eval\\day6_eval.jsonl",
+      "bytes": 49845,
+      "sha256": "f9253b6245a063dfc6c77f2926864618d8cc606914713db01f6267b202cf3852"
+    },
+    "chunks": {
+      "path": "data\\processed\\chunks_section.jsonl",
+      "bytes": 1551833,
+      "sha256": "c55fdcb70ee7c51cb528b3501e63128a6b88e93461b884a6a0316244bb989794"
+    },
+    "chunk_count": 1042,
+    "chunk_strategy": "section"
+  },
+  "excluded_records": {
+    "count": 18,
+    "reason": "clarification_required和unanswerable没有完整gold evidence"
+  }
+}

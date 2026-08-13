@@ -1,0 +1,2260 @@
+{
+  "status": "ok",
+  "records_total": 60,
+  "records_evaluated": 42,
+  "metrics": {
+    "1": {
+      "recall_at_k": 0.0952,
+      "hit_rate_at_k": 0.0952,
+      "mrr_at_k": 0.0952
+    },
+    "3": {
+      "recall_at_k": 0.1627,
+      "hit_rate_at_k": 0.1905,
+      "mrr_at_k": 0.1389
+    },
+    "5": {
+      "recall_at_k": 0.1865,
+      "hit_rate_at_k": 0.2143,
+      "mrr_at_k": 0.1437
+    },
+    "10": {
+      "recall_at_k": 0.2341,
+      "hit_rate_at_k": 0.2857,
+      "mrr_at_k": 0.1511
+    }
+  },
+  "by_split": {
+    "development": {
+      "1": {
+        "recall_at_k": 0.08,
+        "hit_rate_at_k": 0.08,
+        "mrr_at_k": 0.08
+      },
+      "3": {
+        "recall_at_k": 0.1733,
+        "hit_rate_at_k": 0.2,
+        "mrr_at_k": 0.14
+      },
+      "5": {
+        "recall_at_k": 0.2133,
+        "hit_rate_at_k": 0.24,
+        "mrr_at_k": 0.148
+      },
+      "10": {
+        "recall_at_k": 0.2933,
+        "hit_rate_at_k": 0.36,
+        "mrr_at_k": 0.1604
+      }
+    },
+    "test": {
+      "1": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "3": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "5": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      },
+      "10": {
+        "recall_at_k": 0.0,
+        "hit_rate_at_k": 0.0,
+        "mrr_at_k": 0.0
+      }
+    },
+    "validation": {
+      "1": {
+        "recall_at_k": 0.2222,
+        "hit_rate_at_k": 0.2222,
+        "mrr_at_k": 0.2222
+      },
+      "3": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      },
+      "5": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      },
+      "10": {
+        "recall_at_k": 0.2778,
+        "hit_rate_at_k": 0.3333,
+        "mrr_at_k": 0.2593
+      }
+    }
+  },
+  "error_summary": {
+    "analysis_k": 5,
+    "errors": 33,
+    "no_gold": 30,
+    "late_gold_rank": 3
+  },
+  "per_query": [
+    {
+      "id": "d6-001",
+      "question": "Docker容器启动后立即退出，应先查看什么？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-001:section:0006"
+      ],
+      "retrieved_ids": [
+        "docker-001:section:0015",
+        "vllm-001:section:0042",
+        "docker-001:section:0007",
+        "docker-001:section:0043",
+        "docker-001:section:0006",
+        "fastapi-004:section:0037",
+        "docker-001:section:0046",
+        "docker-004:section:0004",
+        "pytorch-001:section:0070",
+        "docker-005:section:0002"
+      ],
+      "retrieved_scores": [
+        0.204432,
+        0.196035,
+        0.185456,
+        0.173554,
+        0.164098,
+        0.163099,
+        0.159248,
+        0.151355,
+        0.14882,
+        0.14686
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.2,
+        "10": 0.2
+      }
+    },
+    {
+      "id": "d6-002",
+      "question": "容器内服务已启动但宿主机无法访问端口，应先检查什么？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-001:section:0047"
+      ],
+      "retrieved_ids": [
+        "fastapi-004:section:0015",
+        "pytorch-003:section:0008",
+        "vllm-007:section:0010",
+        "k8s-006:section:0000",
+        "vllm-002:section:0010",
+        "qdrant-006:section:0020",
+        "qdrant-001:section:0012",
+        "docker-006:section:0000",
+        "k8s-003:section:0045",
+        "k8s-003:section:0046"
+      ],
+      "retrieved_scores": [
+        0.117614,
+        0.11507,
+        0.114163,
+        0.111803,
+        0.109604,
+        0.102632,
+        0.101712,
+        0.099668,
+        0.09477,
+        0.093682
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-003",
+      "question": "Docker容器重启后数据丢失，应该使用什么机制持久化？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-003:section:0001"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0042",
+        "nvidia-004:section:0002",
+        "docker-001:section:0022",
+        "docker-008:section:0011",
+        "fastapi-004:section:0011",
+        "k8s-007:section:0024",
+        "docker-008:section:0012",
+        "docker-001:section:0015",
+        "docker-001:section:0023",
+        "vllm-001:section:0038"
+      ],
+      "retrieved_scores": [
+        0.256721,
+        0.221611,
+        0.212895,
+        0.212588,
+        0.212221,
+        0.207313,
+        0.204769,
+        0.198254,
+        0.196708,
+        0.196484
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-004",
+      "question": "如何用 Docker volume 启动一个容器？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-003:section:0011"
+      ],
+      "retrieved_ids": [
+        "docker-003:section:0010",
+        "docker-003:section:0011",
+        "docker-003:section:0015",
+        "docker-003:section:0019",
+        "docker-003:section:0033",
+        "docker-003:section:0014",
+        "docker-003:section:0012",
+        "k8s-006:section:0028",
+        "docker-003:section:0034",
+        "docker-003:section:0021"
+      ],
+      "retrieved_scores": [
+        0.413194,
+        0.408984,
+        0.389661,
+        0.347524,
+        0.34609,
+        0.329009,
+        0.325313,
+        0.322396,
+        0.310575,
+        0.310358
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      }
+    },
+    {
+      "id": "d6-005",
+      "question": "如何给 Docker 容器配置自动重启策略？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-002:section:0001"
+      ],
+      "retrieved_ids": [
+        "docker-001:section:0046",
+        "docker-008:section:0006",
+        "docker-008:section:0004",
+        "docker-008:section:0011",
+        "docker-007:section:0013",
+        "vllm-001:section:0042",
+        "docker-003:section:0019",
+        "docker-001:section:0006",
+        "vllm-002:section:0003",
+        "fastapi-004:section:0011"
+      ],
+      "retrieved_scores": [
+        0.301536,
+        0.263217,
+        0.250424,
+        0.25024,
+        0.246081,
+        0.238953,
+        0.236779,
+        0.235526,
+        0.233757,
+        0.229856
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-006",
+      "question": "Docker restart policy 什么时候才会生效？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-002:section:0003"
+      ],
+      "retrieved_ids": [
+        "docker-002:section:0003",
+        "k8s-003:section:0016",
+        "k8s-003:section:0023",
+        "docker-002:section:0000",
+        "k8s-003:section:0021",
+        "docker-002:section:0002",
+        "k8s-003:section:0017",
+        "k8s-003:section:0015",
+        "k8s-003:section:0022",
+        "k8s-003:section:0018"
+      ],
+      "retrieved_scores": [
+        0.393281,
+        0.383997,
+        0.365981,
+        0.364168,
+        0.350951,
+        0.305766,
+        0.287262,
+        0.273296,
+        0.272096,
+        0.256472
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      }
+    },
+    {
+      "id": "d6-007",
+      "question": "NVIDIA_VISIBLE_DEVICES 如何影响容器可见 GPU？",
+      "domain": "gpu",
+      "split": "development",
+      "gold_ids": [
+        "nvidia-003:section:0003"
+      ],
+      "retrieved_ids": [
+        "nvidia-003:section:0003",
+        "nvidia-003:section:0004",
+        "nvidia-003:section:0002",
+        "nvidia-003:section:0006",
+        "docker-007:section:0017",
+        "nvidia-001:section:0013",
+        "nvidia-004:section:0013",
+        "nvidia-004:section:0014",
+        "vllm-007:section:0017",
+        "nvidia-001:section:0004"
+      ],
+      "retrieved_scores": [
+        0.430556,
+        0.390216,
+        0.327925,
+        0.268866,
+        0.266018,
+        0.258924,
+        0.224996,
+        0.223661,
+        0.216634,
+        0.212492
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      }
+    },
+    {
+      "id": "d6-008",
+      "question": "NVIDIA 容器运行时主要解决什么问题？",
+      "domain": "gpu",
+      "split": "development",
+      "gold_ids": [
+        "nvidia-005:section:0001"
+      ],
+      "retrieved_ids": [
+        "nvidia-003:section:0006",
+        "nvidia-003:section:0003",
+        "pytorch-004:section:0018",
+        "pytorch-001:section:0047",
+        "nvidia-004:section:0000",
+        "nvidia-002:section:0000",
+        "nvidia-003:section:0000",
+        "nvidia-001:section:0000",
+        "nvidia-005:section:0000",
+        "pytorch-001:section:0033"
+      ],
+      "retrieved_scores": [
+        0.162228,
+        0.158199,
+        0.157517,
+        0.154779,
+        0.146647,
+        0.146647,
+        0.146647,
+        0.146647,
+        0.146647,
+        0.140153
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-009",
+      "question": "PyTorch 中如何判断 CUDA 是否可用？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-001:section:0052"
+      ],
+      "retrieved_ids": [
+        "pytorch-001:section:0000",
+        "pytorch-002:section:0000",
+        "pytorch-003:section:0000",
+        "pytorch-004:section:0000",
+        "pytorch-003:section:0007",
+        "pytorch-005:section:0026",
+        "pytorch-001:section:0001",
+        "pytorch-001:section:0002",
+        "pytorch-001:section:0050",
+        "pytorch-001:section:0052"
+      ],
+      "retrieved_scores": [
+        0.258603,
+        0.258603,
+        0.258603,
+        0.258603,
+        0.250022,
+        0.220526,
+        0.217096,
+        0.216202,
+        0.215353,
+        0.209474
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.1
+      }
+    },
+    {
+      "id": "d6-010",
+      "question": "PyTorch 的 torch.cuda 模块有什么作用？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-001:section:0001"
+      ],
+      "retrieved_ids": [
+        "pytorch-001:section:0060",
+        "pytorch-001:section:0066",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0018",
+        "pytorch-001:section:0013",
+        "pytorch-005:section:0031",
+        "pytorch-001:section:0077",
+        "pytorch-001:section:0014",
+        "pytorch-004:section:0002",
+        "vllm-007:section:0013"
+      ],
+      "retrieved_scores": [
+        0.363517,
+        0.346805,
+        0.346219,
+        0.341078,
+        0.339482,
+        0.336786,
+        0.333587,
+        0.329417,
+        0.326648,
+        0.323903
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-011",
+      "question": "PyTorch 如何减少 CUDA 内存调试时缓存分配器的干扰？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-001:section:0019"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0009",
+        "vllm-007:section:0019",
+        "pytorch-001:section:0077",
+        "pytorch-001:section:0037",
+        "pytorch-001:section:0061",
+        "pytorch-001:section:0060",
+        "pytorch-001:section:0052",
+        "vllm-001:section:0003",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0032"
+      ],
+      "retrieved_scores": [
+        0.288357,
+        0.264949,
+        0.237005,
+        0.221455,
+        0.217087,
+        0.213562,
+        0.213162,
+        0.212079,
+        0.211137,
+        0.210131
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-012",
+      "question": "PyTorch torch.load 的 mmap 参数有什么作用？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-004:section:0008"
+      ],
+      "retrieved_ids": [
+        "pytorch-004:section:0015",
+        "pytorch-004:section:0002",
+        "pytorch-004:section:0029",
+        "pytorch-005:section:0007",
+        "pytorch-005:section:0018",
+        "pytorch-004:section:0019",
+        "pytorch-004:section:0027",
+        "pytorch-004:section:0030",
+        "vllm-001:section:0024",
+        "pytorch-005:section:0026"
+      ],
+      "retrieved_scores": [
+        0.375284,
+        0.363006,
+        0.359194,
+        0.329245,
+        0.326093,
+        0.315006,
+        0.312096,
+        0.30737,
+        0.307285,
+        0.300516
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-013",
+      "question": "Qdrant 集合为什么要配置向量距离指标？",
+      "domain": "qdrant",
+      "split": "development",
+      "gold_ids": [
+        "qdrant-001:section:0004"
+      ],
+      "retrieved_ids": [
+        "qdrant-002:section:0047",
+        "qdrant-004:section:0033",
+        "qdrant-002:section:0048",
+        "qdrant-006:section:0017",
+        "qdrant-002:section:0049",
+        "qdrant-001:section:0003",
+        "qdrant-006:section:0016",
+        "qdrant-002:section:0010",
+        "qdrant-004:section:0009",
+        "qdrant-004:section:0030"
+      ],
+      "retrieved_scores": [
+        0.297803,
+        0.289904,
+        0.288377,
+        0.285584,
+        0.282791,
+        0.27686,
+        0.271811,
+        0.261189,
+        0.260955,
+        0.259679
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-014",
+      "question": "Qdrant 集合的向量维度为什么必须和 Embedding 维度一致？",
+      "domain": "qdrant",
+      "split": "development",
+      "gold_ids": [
+        "qdrant-002:section:0024"
+      ],
+      "retrieved_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-005:section:0010",
+        "qdrant-002:section:0048",
+        "qdrant-004:section:0018",
+        "qdrant-006:section:0006",
+        "qdrant-004:section:0031",
+        "qdrant-004:section:0049",
+        "qdrant-004:section:0028",
+        "k8s-006:section:0051",
+        "k8s-006:section:0053"
+      ],
+      "retrieved_scores": [
+        0.170005,
+        0.135065,
+        0.129001,
+        0.126147,
+        0.119449,
+        0.117445,
+        0.117409,
+        0.116495,
+        0.115286,
+        0.113767
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-015",
+      "question": "Qdrant 本地客户端如何连接服务？",
+      "domain": "qdrant",
+      "split": "validation",
+      "gold_ids": [
+        "qdrant-001:section:0003"
+      ],
+      "retrieved_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-002:section:0048",
+        "qdrant-004:section:0035",
+        "qdrant-002:section:0049",
+        "qdrant-005:section:0014",
+        "qdrant-004:section:0009",
+        "qdrant-002:section:0047",
+        "qdrant-001:section:0002",
+        "qdrant-004:section:0033",
+        "qdrant-004:section:0031"
+      ],
+      "retrieved_scores": [
+        0.284601,
+        0.250496,
+        0.247638,
+        0.243546,
+        0.241689,
+        0.224559,
+        0.224126,
+        0.218535,
+        0.218451,
+        0.215058
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      }
+    },
+    {
+      "id": "d6-016",
+      "question": "Qdrant 如何通过 Docker 快速用于开发测试？",
+      "domain": "qdrant",
+      "split": "validation",
+      "gold_ids": [
+        "qdrant-005:section:0013"
+      ],
+      "retrieved_ids": [
+        "qdrant-001:section:0002",
+        "qdrant-002:section:0013",
+        "qdrant-003:section:0009",
+        "qdrant-006:section:0028",
+        "qdrant-003:section:0006",
+        "qdrant-004:section:0058",
+        "qdrant-006:section:0027",
+        "qdrant-005:section:0012",
+        "qdrant-004:section:0035",
+        "qdrant-001:section:0003"
+      ],
+      "retrieved_scores": [
+        0.256541,
+        0.246822,
+        0.244546,
+        0.238933,
+        0.238592,
+        0.237488,
+        0.23584,
+        0.233462,
+        0.231129,
+        0.22956
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-017",
+      "question": "FastAPI 如何启动多个 worker？",
+      "domain": "fastapi",
+      "split": "validation",
+      "gold_ids": [
+        "fastapi-003:section:0001"
+      ],
+      "retrieved_ids": [
+        "vllm-007:section:0006",
+        "nvidia-001:section:0014",
+        "k8s-002:section:0002",
+        "fastapi-004:section:0036",
+        "pytorch-003:section:0014",
+        "fastapi-001:section:0000",
+        "fastapi-005:section:0021",
+        "docker-004:section:0012",
+        "nvidia-002:section:0001",
+        "docker-007:section:0016"
+      ],
+      "retrieved_scores": [
+        0.279452,
+        0.229451,
+        0.222862,
+        0.219028,
+        0.198306,
+        0.191785,
+        0.188303,
+        0.18586,
+        0.184849,
+        0.182426
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-018",
+      "question": "FastAPI 官方 Docker 基础镜像是否应该继续使用？",
+      "domain": "fastapi",
+      "split": "validation",
+      "gold_ids": [
+        "fastapi-004:section:0036"
+      ],
+      "retrieved_ids": [
+        "docker-001:section:0006",
+        "vllm-001:section:0042",
+        "fastapi-004:section:0011",
+        "docker-001:section:0015",
+        "vllm-001:section:0036",
+        "docker-001:section:0007",
+        "docker-008:section:0010",
+        "qdrant-005:section:0011",
+        "docker-004:section:0000",
+        "docker-004:section:0004"
+      ],
+      "retrieved_scores": [
+        0.276762,
+        0.27544,
+        0.266241,
+        0.258592,
+        0.250934,
+        0.248176,
+        0.245219,
+        0.233096,
+        0.230979,
+        0.226199
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-019",
+      "question": "FastAPI 如何复用默认异常处理器？",
+      "domain": "fastapi",
+      "split": "validation",
+      "gold_ids": [
+        "fastapi-006:section:0014"
+      ],
+      "retrieved_ids": [
+        "fastapi-006:section:0012",
+        "fastapi-006:section:0006",
+        "fastapi-004:section:0011",
+        "fastapi-005:section:0021",
+        "fastapi-002:section:0004",
+        "pytorch-001:section:0052",
+        "fastapi-006:section:0010",
+        "fastapi-002:section:0002",
+        "fastapi-004:section:0007",
+        "fastapi-001:section:0000"
+      ],
+      "retrieved_scores": [
+        0.224795,
+        0.207534,
+        0.180162,
+        0.179743,
+        0.17734,
+        0.175758,
+        0.172267,
+        0.169772,
+        0.168873,
+        0.167812
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-020",
+      "question": "vLLM 数据并行部署如何配置并行规模？",
+      "domain": "vllm",
+      "split": "test",
+      "gold_ids": [
+        "vllm-006:section:0002"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0006",
+        "vllm-007:section:0012",
+        "vllm-004:section:0004",
+        "k8s-004:section:0009",
+        "vllm-004:section:0000",
+        "vllm-001:section:0014",
+        "vllm-004:section:0006",
+        "pytorch-001:section:0046",
+        "qdrant-005:section:0008",
+        "k8s-006:section:0034"
+      ],
+      "retrieved_scores": [
+        0.185355,
+        0.173765,
+        0.165063,
+        0.162634,
+        0.142521,
+        0.141158,
+        0.137036,
+        0.136483,
+        0.135249,
+        0.134447
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-021",
+      "question": "容器端口没有发布到宿主机时会发生什么？",
+      "domain": "docker",
+      "split": "test",
+      "gold_ids": [
+        "docker-001:section:0047"
+      ],
+      "retrieved_ids": [
+        "pytorch-004:section:0008",
+        "nvidia-001:section:0013",
+        "pytorch-004:section:0009",
+        "k8s-002:section:0002",
+        "docker-006:section:0004",
+        "docker-004:section:0006",
+        "fastapi-005:section:0018",
+        "k8s-002:section:0003",
+        "k8s-007:section:0016",
+        "fastapi-003:section:0000"
+      ],
+      "retrieved_scores": [
+        0.127015,
+        0.120515,
+        0.115824,
+        0.10459,
+        0.103228,
+        0.101559,
+        0.100871,
+        0.100661,
+        0.099857,
+        0.098716
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-022",
+      "question": "如何让 Docker 容器重启后仍能访问业务数据？",
+      "domain": "docker",
+      "split": "test",
+      "gold_ids": [
+        "docker-003:section:0011"
+      ],
+      "retrieved_ids": [
+        "docker-004:section:0004",
+        "docker-004:section:0010",
+        "docker-001:section:0036",
+        "docker-008:section:0006",
+        "vllm-001:section:0042",
+        "docker-008:section:0004",
+        "docker-004:section:0007",
+        "docker-004:section:0000",
+        "k8s-007:section:0024",
+        "docker-001:section:0007"
+      ],
+      "retrieved_scores": [
+        0.286255,
+        0.240595,
+        0.238162,
+        0.23587,
+        0.223307,
+        0.217522,
+        0.215922,
+        0.215655,
+        0.206573,
+        0.203999
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-023",
+      "question": "Docker volume 为什么适合保存容器产生的数据？",
+      "domain": "docker",
+      "split": "test",
+      "gold_ids": [
+        "docker-003:section:0001"
+      ],
+      "retrieved_ids": [
+        "docker-003:section:0010",
+        "docker-003:section:0011",
+        "docker-003:section:0034",
+        "docker-003:section:0000",
+        "docker-003:section:0003",
+        "docker-003:section:0006",
+        "docker-003:section:0008",
+        "docker-001:section:0012",
+        "docker-003:section:0015",
+        "docker-003:section:0012"
+      ],
+      "retrieved_scores": [
+        0.369048,
+        0.30527,
+        0.29156,
+        0.284429,
+        0.274018,
+        0.270213,
+        0.247226,
+        0.242563,
+        0.240862,
+        0.238176
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-024",
+      "question": "Qdrant 的稀疏向量适合解决什么类型的文本检索问题？",
+      "domain": "qdrant",
+      "split": "test",
+      "gold_ids": [
+        "qdrant-002:section:0012"
+      ],
+      "retrieved_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0015",
+        "qdrant-004:section:0048",
+        "qdrant-004:section:0018",
+        "qdrant-004:section:0017",
+        "qdrant-004:section:0049",
+        "qdrant-002:section:0048",
+        "qdrant-004:section:0012",
+        "qdrant-004:section:0020",
+        "qdrant-004:section:0033"
+      ],
+      "retrieved_scores": [
+        0.277999,
+        0.26801,
+        0.262247,
+        0.256959,
+        0.256385,
+        0.24995,
+        0.241525,
+        0.240819,
+        0.238218,
+        0.237541
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-025",
+      "question": "宿主机 nvidia-smi 正常但 Docker 容器无法识别 GPU，应如何分层排查？",
+      "domain": "gpu",
+      "split": "development",
+      "gold_ids": [
+        "nvidia-003:section:0003",
+        "nvidia-005:section:0001",
+        "pytorch-001:section:0052"
+      ],
+      "retrieved_ids": [
+        "nvidia-004:section:0006",
+        "nvidia-003:section:0003",
+        "nvidia-003:section:0006",
+        "nvidia-003:section:0004",
+        "docker-008:section:0006",
+        "k8s-002:section:0014",
+        "fastapi-004:section:0011",
+        "qdrant-001:section:0010",
+        "docker-007:section:0017",
+        "docker-001:section:0009"
+      ],
+      "retrieved_scores": [
+        0.300214,
+        0.293926,
+        0.268393,
+        0.263718,
+        0.249559,
+        0.241076,
+        0.239084,
+        0.21964,
+        0.218218,
+        0.210332
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.3333333333333333,
+        "5": 0.3333333333333333,
+        "10": 0.3333333333333333
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      }
+    },
+    {
+      "id": "d6-026",
+      "question": "Docker 容器内服务监听正常但宿主机访问失败，应如何从端口发布和进程监听两层定位？",
+      "domain": "docker",
+      "split": "development",
+      "gold_ids": [
+        "docker-001:section:0047"
+      ],
+      "retrieved_ids": [
+        "docker-003:section:0019",
+        "nvidia-004:section:0006",
+        "k8s-007:section:0024",
+        "vllm-001:section:0042",
+        "vllm-001:section:0043",
+        "k8s-006:section:0048",
+        "docker-008:section:0006",
+        "docker-004:section:0007",
+        "docker-001:section:0009",
+        "docker-001:section:0015"
+      ],
+      "retrieved_scores": [
+        0.153516,
+        0.143538,
+        0.138028,
+        0.13454,
+        0.12466,
+        0.116277,
+        0.115132,
+        0.113468,
+        0.113208,
+        0.111702
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-027",
+      "question": "容器重启后 Qdrant 数据丢失，应如何区分 volume 挂载问题和服务连接问题？",
+      "domain": "qdrant",
+      "split": "development",
+      "gold_ids": [
+        "docker-003:section:0001",
+        "qdrant-001:section:0003"
+      ],
+      "retrieved_ids": [
+        "k8s-006:section:0053",
+        "k8s-006:section:0060",
+        "docker-003:section:0008",
+        "k8s-006:section:0058",
+        "qdrant-002:section:0048",
+        "docker-003:section:0010",
+        "qdrant-002:section:0049",
+        "k8s-006:section:0017",
+        "qdrant-001:section:0003",
+        "k8s-006:section:0066"
+      ],
+      "retrieved_scores": [
+        0.240156,
+        0.234756,
+        0.22687,
+        0.211912,
+        0.210907,
+        0.210298,
+        0.204876,
+        0.201087,
+        0.199506,
+        0.198956
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.5
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.1111111111111111
+      }
+    },
+    {
+      "id": "d6-028",
+      "question": "PyTorch CUDA 不可用时，如何区分代码设备选择、容器 GPU 和驱动问题？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-001:section:0052",
+        "nvidia-003:section:0003"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0009",
+        "pytorch-001:section:0001",
+        "pytorch-005:section:0018",
+        "pytorch-005:section:0009",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0019",
+        "vllm-001:section:0003",
+        "pytorch-001:section:0004",
+        "vllm-001:section:0021",
+        "pytorch-001:section:0052"
+      ],
+      "retrieved_scores": [
+        0.251055,
+        0.24604,
+        0.243752,
+        0.23644,
+        0.236127,
+        0.235228,
+        0.231855,
+        0.218516,
+        0.217496,
+        0.21597
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.5
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.1
+      }
+    },
+    {
+      "id": "d6-029",
+      "question": "运行模型出现 CUDA 内存错误时，应如何同时检查缓存分配器和运行资源？",
+      "domain": "pytorch",
+      "split": "development",
+      "gold_ids": [
+        "pytorch-001:section:0019",
+        "vllm-007:section:0002"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0037",
+        "vllm-006:section:0007",
+        "k8s-006:section:0051",
+        "nvidia-003:section:0010",
+        "vllm-006:section:0003",
+        "pytorch-001:section:0001",
+        "pytorch-005:section:0025",
+        "vllm-001:section:0043",
+        "pytorch-001:section:0013",
+        "k8s-006:section:0042"
+      ],
+      "retrieved_scores": [
+        0.105747,
+        0.091606,
+        0.089523,
+        0.087768,
+        0.080946,
+        0.08063,
+        0.07906,
+        0.0785,
+        0.077915,
+        0.077745
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-030",
+      "question": "vLLM 数据并行扩展时，如何选择内部还是外部负载均衡？",
+      "domain": "vllm",
+      "split": "development",
+      "gold_ids": [
+        "vllm-006:section:0002",
+        "vllm-006:section:0006"
+      ],
+      "retrieved_ids": [
+        "docker-001:section:0016",
+        "vllm-004:section:0004",
+        "pytorch-001:section:0045",
+        "k8s-004:section:0009",
+        "docker-001:section:0022",
+        "vllm-007:section:0012",
+        "k8s-002:section:0010",
+        "docker-003:section:0029",
+        "fastapi-004:section:0032",
+        "vllm-004:section:0002"
+      ],
+      "retrieved_scores": [
+        0.166601,
+        0.15434,
+        0.13477,
+        0.11838,
+        0.117571,
+        0.115312,
+        0.111688,
+        0.109317,
+        0.108632,
+        0.107521
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-031",
+      "question": "vLLM 模型加载缓慢时，如何从模型磁盘位置和共享文件系统排查？",
+      "domain": "vllm",
+      "split": "development",
+      "gold_ids": [
+        "vllm-007:section:0002"
+      ],
+      "retrieved_ids": [
+        "vllm-001:section:0014",
+        "vllm-001:section:0003",
+        "docker-001:section:0040",
+        "vllm-001:section:0012",
+        "vllm-001:section:0010",
+        "vllm-001:section:0013",
+        "vllm-007:section:0012",
+        "vllm-001:section:0036",
+        "k8s-006:section:0031",
+        "vllm-001:section:0022"
+      ],
+      "retrieved_scores": [
+        0.181743,
+        0.165685,
+        0.164152,
+        0.161024,
+        0.159639,
+        0.15788,
+        0.157247,
+        0.147912,
+        0.144009,
+        0.141908
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-032",
+      "question": "FastAPI 并发请求超时时，如何结合 worker 配置和异常处理定位？",
+      "domain": "fastapi",
+      "split": "development",
+      "gold_ids": [
+        "fastapi-003:section:0001",
+        "fastapi-006:section:0014"
+      ],
+      "retrieved_ids": [
+        "fastapi-004:section:0036",
+        "vllm-007:section:0006",
+        "fastapi-001:section:0000",
+        "docker-004:section:0002",
+        "fastapi-004:section:0025",
+        "fastapi-004:section:0029",
+        "docker-004:section:0007",
+        "fastapi-002:section:0002",
+        "k8s-002:section:0003",
+        "vllm-007:section:0020"
+      ],
+      "retrieved_scores": [
+        0.224938,
+        0.214975,
+        0.19696,
+        0.184653,
+        0.18,
+        0.178244,
+        0.177471,
+        0.174352,
+        0.171891,
+        0.163907
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-033",
+      "question": "Qdrant 检索结果不相关时，如何区分向量维度、距离指标和 Chunk 内容问题？",
+      "domain": "rag",
+      "split": "development",
+      "gold_ids": [
+        "qdrant-002:section:0024",
+        "qdrant-001:section:0004"
+      ],
+      "retrieved_ids": [
+        "qdrant-004:section:0009",
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0033",
+        "qdrant-002:section:0048",
+        "qdrant-002:section:0049",
+        "qdrant-004:section:0041",
+        "qdrant-004:section:0020",
+        "qdrant-004:section:0030",
+        "qdrant-004:section:0019",
+        "qdrant-002:section:0023"
+      ],
+      "retrieved_scores": [
+        0.195987,
+        0.188041,
+        0.16854,
+        0.16709,
+        0.15808,
+        0.153293,
+        0.148579,
+        0.144027,
+        0.144005,
+        0.143608
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-034",
+      "question": "Qdrant 关键词和向量检索如何组合以兼顾错误码与同义表达？",
+      "domain": "rag",
+      "split": "development",
+      "gold_ids": [
+        "qdrant-002:section:0012",
+        "qdrant-002:section:0024"
+      ],
+      "retrieved_ids": [
+        "qdrant-002:section:0023",
+        "qdrant-003:section:0008",
+        "qdrant-003:section:0009",
+        "qdrant-006:section:0004",
+        "qdrant-002:section:0022",
+        "qdrant-003:section:0003",
+        "qdrant-006:section:0007",
+        "qdrant-002:section:0047",
+        "qdrant-001:section:0004",
+        "qdrant-004:section:0059"
+      ],
+      "retrieved_scores": [
+        0.234676,
+        0.223697,
+        0.21394,
+        0.213789,
+        0.209516,
+        0.209126,
+        0.204094,
+        0.201892,
+        0.198751,
+        0.198263
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-035",
+      "question": "NVIDIA 容器在 SELinux 环境中出现权限错误，应如何排查风险？",
+      "domain": "gpu",
+      "split": "development",
+      "gold_ids": [
+        "nvidia-004:section:0006"
+      ],
+      "retrieved_ids": [
+        "nvidia-003:section:0006",
+        "nvidia-004:section:0006",
+        "qdrant-004:section:0015",
+        "qdrant-002:section:0027",
+        "qdrant-004:section:0018",
+        "qdrant-002:section:0044",
+        "nvidia-004:section:0014",
+        "qdrant-004:section:0024",
+        "qdrant-004:section:0017",
+        "nvidia-001:section:0000"
+      ],
+      "retrieved_scores": [
+        0.154863,
+        0.143291,
+        0.127259,
+        0.125814,
+        0.119436,
+        0.116473,
+        0.11364,
+        0.11195,
+        0.109592,
+        0.109109
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      }
+    },
+    {
+      "id": "d6-036",
+      "question": "PyTorch checkpoint 加载慢时，如何判断是否适合使用 mmap？",
+      "domain": "pytorch",
+      "split": "validation",
+      "gold_ids": [
+        "pytorch-004:section:0008"
+      ],
+      "retrieved_ids": [
+        "pytorch-004:section:0008",
+        "pytorch-005:section:0009",
+        "qdrant-002:section:0016",
+        "vllm-001:section:0024",
+        "pytorch-004:section:0009",
+        "pytorch-005:section:0018",
+        "pytorch-005:section:0000",
+        "pytorch-005:section:0002",
+        "pytorch-004:section:0029",
+        "pytorch-002:section:0002"
+      ],
+      "retrieved_scores": [
+        0.289253,
+        0.213299,
+        0.208526,
+        0.208364,
+        0.194354,
+        0.193383,
+        0.191683,
+        0.189969,
+        0.189027,
+        0.188311
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "hit_rate_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      }
+    },
+    {
+      "id": "d6-037",
+      "question": "Qdrant 集合设计时，如何同时考虑向量 Schema 和 Payload 索引？",
+      "domain": "qdrant",
+      "split": "validation",
+      "gold_ids": [
+        "qdrant-002:section:0024",
+        "qdrant-004:section:0020"
+      ],
+      "retrieved_ids": [
+        "qdrant-004:section:0017",
+        "qdrant-004:section:0014",
+        "qdrant-004:section:0020",
+        "qdrant-004:section:0015",
+        "qdrant-004:section:0033",
+        "qdrant-004:section:0027",
+        "qdrant-004:section:0030",
+        "qdrant-004:section:0010",
+        "qdrant-004:section:0041",
+        "qdrant-004:section:0023"
+      ],
+      "retrieved_scores": [
+        0.197342,
+        0.185228,
+        0.183716,
+        0.18255,
+        0.180872,
+        0.174808,
+        0.172412,
+        0.172408,
+        0.170208,
+        0.168186
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.5,
+        "5": 0.5,
+        "10": 0.5
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0,
+        "10": 1.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.3333333333333333,
+        "5": 0.3333333333333333,
+        "10": 0.3333333333333333
+      }
+    },
+    {
+      "id": "d6-038",
+      "question": "Docker volume 和 Qdrant 服务变更时，如何设计低风险迁移步骤？",
+      "domain": "qdrant",
+      "split": "validation",
+      "gold_ids": [
+        "docker-003:section:0001",
+        "qdrant-005:section:0013"
+      ],
+      "retrieved_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-002:section:0048",
+        "qdrant-002:section:0049",
+        "qdrant-002:section:0047",
+        "qdrant-002:section:0003",
+        "qdrant-004:section:0009",
+        "qdrant-004:section:0059",
+        "qdrant-003:section:0005",
+        "qdrant-004:section:0058",
+        "docker-003:section:0024"
+      ],
+      "retrieved_scores": [
+        0.32693,
+        0.306187,
+        0.298523,
+        0.274224,
+        0.225475,
+        0.224596,
+        0.214912,
+        0.209187,
+        0.206358,
+        0.206214
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-039",
+      "question": "vLLM 多节点数据并行时，如何根据拓扑和负载均衡方案设计测试？",
+      "domain": "vllm",
+      "split": "validation",
+      "gold_ids": [
+        "vllm-006:section:0002",
+        "vllm-006:section:0006"
+      ],
+      "retrieved_ids": [
+        "k8s-004:section:0008",
+        "k8s-003:section:0035",
+        "docker-001:section:0017",
+        "pytorch-001:section:0039",
+        "k8s-004:section:0007",
+        "vllm-007:section:0017",
+        "docker-001:section:0030",
+        "docker-001:section:0022",
+        "vllm-001:section:0009",
+        "vllm-007:section:0016"
+      ],
+      "retrieved_scores": [
+        0.164835,
+        0.161292,
+        0.15084,
+        0.145114,
+        0.141883,
+        0.126177,
+        0.124576,
+        0.123511,
+        0.115029,
+        0.114465
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-040",
+      "question": "RAG 有来源但答案仍不可靠，应如何区分证据质量和生成模型问题？",
+      "domain": "rag",
+      "split": "test",
+      "gold_ids": [
+        "qdrant-002:section:0024",
+        "vllm-007:section:0002"
+      ],
+      "retrieved_ids": [
+        "docker-003:section:0035",
+        "k8s-007:section:0027",
+        "pytorch-004:section:0029",
+        "k8s-007:section:0028",
+        "pytorch-005:section:0015",
+        "k8s-004:section:0004",
+        "k8s-006:section:0027",
+        "pytorch-005:section:0024",
+        "k8s-006:section:0045",
+        "docker-006:section:0005"
+      ],
+      "retrieved_scores": [
+        0.148727,
+        0.131748,
+        0.127674,
+        0.124967,
+        0.121907,
+        0.121427,
+        0.118736,
+        0.118209,
+        0.115979,
+        0.113039
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-041",
+      "question": "Docker、NVIDIA runtime 和 PyTorch 都正常但模型仍失败，如何设计最小复现实验？",
+      "domain": "gpu",
+      "split": "test",
+      "gold_ids": [
+        "nvidia-003:section:0003",
+        "pytorch-001:section:0052"
+      ],
+      "retrieved_ids": [
+        "pytorch-002:section:0000",
+        "pytorch-004:section:0000",
+        "pytorch-003:section:0000",
+        "pytorch-001:section:0000",
+        "nvidia-001:section:0008",
+        "nvidia-001:section:0009",
+        "k8s-007:section:0010",
+        "vllm-001:section:0024",
+        "nvidia-004:section:0006",
+        "nvidia-005:section:0001"
+      ],
+      "retrieved_scores": [
+        0.264456,
+        0.264456,
+        0.264456,
+        0.264456,
+        0.247652,
+        0.24027,
+        0.227651,
+        0.214437,
+        0.204384,
+        0.200263
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    },
+    {
+      "id": "d6-042",
+      "question": "FastAPI 模型服务如何权衡多个 worker 与单 GPU 资源竞争？",
+      "domain": "fastapi",
+      "split": "test",
+      "gold_ids": [
+        "fastapi-003:section:0001",
+        "vllm-006:section:0002"
+      ],
+      "retrieved_ids": [
+        "k8s-002:section:0002",
+        "vllm-007:section:0006",
+        "fastapi-001:section:0000",
+        "pytorch-005:section:0019",
+        "pytorch-003:section:0014",
+        "vllm-002:section:0001",
+        "k8s-002:section:0003",
+        "fastapi-006:section:0002",
+        "fastapi-004:section:0007",
+        "fastapi-005:section:0021"
+      ],
+      "retrieved_scores": [
+        0.230739,
+        0.221532,
+        0.205497,
+        0.181624,
+        0.180102,
+        0.167652,
+        0.164364,
+        0.162144,
+        0.153588,
+        0.146738
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "hit_rate_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      },
+      "mrr_at_k": {
+        "1": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "10": 0.0
+      }
+    }
+  ]
+}
