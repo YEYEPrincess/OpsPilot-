@@ -1,0 +1,174 @@
+{
+  "experiment": "day10_answerability_guard",
+  "case_count": 18,
+  "distribution": {
+    "answer": 8,
+    "clarify": 5,
+    "refuse": 5
+  },
+  "config": {
+    "min_top_score": 0.35
+  },
+  "metrics": {
+    "naive_baseline": {
+      "action_accuracy": 0.5,
+      "unsafe_answer_rate": 0.9,
+      "answerable_coverage": 1.0
+    },
+    "guarded_policy": {
+      "action_accuracy": 1.0,
+      "unsafe_answer_rate": 0.0,
+      "answerable_coverage": 1.0
+    }
+  },
+  "limitations": [
+    "This is a controlled calibration set, not production traffic.",
+    "Citation structure validation does not prove semantic entailment."
+  ],
+  "per_case": [
+    {
+      "id": "g-001",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.88
+    },
+    {
+      "id": "g-002",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.91
+    },
+    {
+      "id": "g-003",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.79
+    },
+    {
+      "id": "g-004",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.84
+    },
+    {
+      "id": "g-005",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.76
+    },
+    {
+      "id": "g-006",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.73
+    },
+    {
+      "id": "g-007",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.69
+    },
+    {
+      "id": "g-008",
+      "expected": "answer",
+      "baseline": "answer",
+      "guarded": "answer",
+      "reason": "sufficient_retrieval_evidence",
+      "top_score": 0.82
+    },
+    {
+      "id": "g-009",
+      "expected": "clarify",
+      "baseline": "answer",
+      "guarded": "clarify",
+      "reason": "question_is_underspecified",
+      "top_score": 0.72
+    },
+    {
+      "id": "g-010",
+      "expected": "clarify",
+      "baseline": "answer",
+      "guarded": "clarify",
+      "reason": "question_is_underspecified",
+      "top_score": 0.75
+    },
+    {
+      "id": "g-011",
+      "expected": "clarify",
+      "baseline": "answer",
+      "guarded": "clarify",
+      "reason": "question_is_underspecified",
+      "top_score": 0.66
+    },
+    {
+      "id": "g-012",
+      "expected": "clarify",
+      "baseline": "answer",
+      "guarded": "clarify",
+      "reason": "question_is_underspecified",
+      "top_score": 0.58
+    },
+    {
+      "id": "g-013",
+      "expected": "clarify",
+      "baseline": "answer",
+      "guarded": "clarify",
+      "reason": "question_is_underspecified",
+      "top_score": 0.8
+    },
+    {
+      "id": "g-014",
+      "expected": "refuse",
+      "baseline": "answer",
+      "guarded": "refuse",
+      "reason": "retrieval_confidence_below_threshold",
+      "top_score": 0.18
+    },
+    {
+      "id": "g-015",
+      "expected": "refuse",
+      "baseline": "answer",
+      "guarded": "refuse",
+      "reason": "retrieval_confidence_below_threshold",
+      "top_score": 0.2
+    },
+    {
+      "id": "g-016",
+      "expected": "refuse",
+      "baseline": "refuse",
+      "guarded": "refuse",
+      "reason": "no_evidence",
+      "top_score": 0.0
+    },
+    {
+      "id": "g-017",
+      "expected": "refuse",
+      "baseline": "answer",
+      "guarded": "refuse",
+      "reason": "retrieval_confidence_below_threshold",
+      "top_score": 0.14
+    },
+    {
+      "id": "g-018",
+      "expected": "refuse",
+      "baseline": "answer",
+      "guarded": "refuse",
+      "reason": "retrieval_confidence_below_threshold",
+      "top_score": 0.09
+    }
+  ]
+}

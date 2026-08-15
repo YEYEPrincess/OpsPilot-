@@ -1,0 +1,17 @@
+{
+  "experiment": "day12_sse_in_process",
+  "requests": 20,
+  "complete_rate": 1.0,
+  "first_event_ms": {
+    "mean": 5.573,
+    "p50": 4.935,
+    "p95": 6.371
+  },
+  "total_ms": {
+    "mean": 5.619,
+    "p50": 4.976,
+    "p95": 6.416
+  },
+  "feedback_endpoint_ok": true,
+  "note": "TestClient may buffer chunks; verify true TTFT through Uvicorn before production."
+}

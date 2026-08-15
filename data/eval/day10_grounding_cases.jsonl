@@ -1,0 +1,18 @@
+{"id":"g-001","question":"Docker 容器退出后如何查看退出状态和日志？","expected_action":"answer","scores":[0.88,0.61]}
+{"id":"g-002","question":"PyTorch 如何确认当前 CUDA 是否可用？","expected_action":"answer","scores":[0.91,0.65]}
+{"id":"g-003","question":"Qdrant 集合不存在时应该先检查什么？","expected_action":"answer","scores":[0.79,0.55]}
+{"id":"g-004","question":"FastAPI 如何区分存活检查和就绪检查？","expected_action":"answer","scores":[0.84,0.63]}
+{"id":"g-005","question":"vLLM 服务启动后如何验证接口可访问？","expected_action":"answer","scores":[0.76,0.51]}
+{"id":"g-006","question":"Docker GPU 容器看不到显卡时检查哪些运行参数？","expected_action":"answer","scores":[0.73,0.48]}
+{"id":"g-007","question":"RAG 检索没有命中正确文档时先检查什么？","expected_action":"answer","scores":[0.69,0.44]}
+{"id":"g-008","question":"CUDA out of memory 时可以检查哪些显存因素？","expected_action":"answer","scores":[0.82,0.60]}
+{"id":"g-009","question":"报错了怎么办","expected_action":"clarify","scores":[0.72,0.43]}
+{"id":"g-010","question":"Docker 有问题","expected_action":"clarify","scores":[0.75,0.40]}
+{"id":"g-011","question":"GPU 不能用","expected_action":"clarify","scores":[0.66,0.41]}
+{"id":"g-012","question":"服务怎么回事","expected_action":"clarify","scores":[0.58]}
+{"id":"g-013","question":"帮我看看","expected_action":"clarify","scores":[0.80]}
+{"id":"g-014","question":"如何配置知识库未收录的自研 NPU 驱动？","expected_action":"refuse","scores":[0.18,0.12]}
+{"id":"g-015","question":"某个未公开框架是否兼容未来 CUDA 版本？","expected_action":"refuse","scores":[0.20]}
+{"id":"g-016","question":"请根据没有提供的生产日志确定唯一根因。","expected_action":"refuse","scores":[]}
+{"id":"g-017","question":"知识库外的专有模型启动参数是什么？","expected_action":"refuse","scores":[0.14,0.10]}
+{"id":"g-018","question":"未发布 GPU 的精确驱动要求是什么？","expected_action":"refuse","scores":[0.09]}

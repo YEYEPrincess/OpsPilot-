@@ -1,0 +1,18 @@
+{
+  "experiment": "day11_fastapi_in_process",
+  "requests": 30,
+  "success_rate": 1.0,
+  "latency_ms": {
+    "mean": 3.297,
+    "p50": 2.976,
+    "p95": 3.776,
+    "max": 12.046
+  },
+  "contract_checks": {
+    "openapi": true,
+    "liveness": true,
+    "readiness": true,
+    "validation_422": true
+  },
+  "note": "In-process TestClient excludes network and reverse-proxy latency."
+}

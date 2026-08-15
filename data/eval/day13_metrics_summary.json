@@ -1,0 +1,28 @@
+{
+  "experiment": "day13_observability_demo",
+  "successful_requests": 36,
+  "metrics": {
+    "request_count": 36,
+    "latency_ms": {
+      "mean": 0.083,
+      "p50": 0.068,
+      "p95": 0.207,
+      "max": 0.217
+    },
+    "stage_mean_ms": {
+      "cache_lookup": 0.045,
+      "generation": 0.002,
+      "rerank": 0.001,
+      "retrieval": 0.087
+    },
+    "error_rate": 0.0,
+    "errors": {},
+    "cache_hit_rate": 0.9167,
+    "token_total": 1608
+  },
+  "largest_mean_stage": "retrieval",
+  "privacy_check": {
+    "raw_questions_logged": false,
+    "question_fingerprint_present": true
+  }
+}
