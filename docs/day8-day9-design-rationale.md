@@ -44,25 +44,7 @@ Day 8 增加 BM25 关键词检索，并用 RRF 把 Dense 与 BM25 的结果融�
 否则指标变化可能来自数据、Chunk 或机器，而不是新检索方法。
 
 ## 3. 先安装依赖
-
-在 PowerShell 中进入项目目录：
-
-```powershell
-cd D:\Documents\大模型项目\opspilot
-```
-
-Day 8 安装 BM25：
-
-```powershell
-uv add rank-bm25
-```
-
-Day 9 安装 Cross-Encoder 支持：
-
-```powershell
-uv add sentence-transformers
-```
-
+Day 8 安装 BM25；Day 9 安装 Cross-Encoder 支持：
 为什么使用 `uv add`：它会同时更新 `pyproject.toml` 和 `uv.lock`。`pyproject.toml` 表达允许的依赖范围，`uv.lock` 记录这次实际解析到的精确版本，有利于复现实验。
 
 为什么 Day 8 选择 `rank-bm25`：当前只有约一千个 Chunk，它的接口简单，适合理解 BM25 原理。没有选择 Elasticsearch/OpenSearch，是因为后者需要额外服务、JVM、索引配置和运维，四小时内会把重点从检索原理转移到基础设施。生产数据达到几十万或百万 Chunk、需要持久化倒排索引和并发过滤时，再考虑 Elasticsearch/OpenSearch。
@@ -103,282 +85,28 @@ BM25 不擅长：
 因此它适合补充 Dense Retrieval，而不是完全替代 Dense Retrieval。
 
 ## 5. 第一步：实现 BM25 索引模块（约 45 分钟）
-
-请创建：
-
-```text
-retrieval/bm25_store.py
-```
-
-代码：
-
-```python
-"""轻量、可持久化的 BM25 检索模块。"""
-
-from __future__ import annotations
-
-import gzip
-import heapq
-import json
-import re
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
-
-from rank_bm25 import BM25Okapi
-
-
-# 保留技术标识符；中文暂时按单字切分。
-# 索引和查询必须使用完全相同的 tokenizer。
-TOKEN_RE = re.compile(r"[A-Za-z0-9_./:=+\-]+|[\u4e00-\u9fff]")
-
-
-def tokenize(text: str) -> list[str]:
-    """把文本转换为 BM25 使用的 token 列表。"""
-    return TOKEN_RE.findall(text.lower())
-
-
-@dataclass(frozen=True)
-class BM25Hit:
-    """统一表示一条 BM25 搜索结果。"""
-
-    score: float
-    payload: dict[str, Any]
-
-
-class BM25Index:
-    """从 Chunk 构建、保存、加载和查询 BM25 索引。"""
-
-    schema_version = "bm25-v1"
-
-    def __init__(self, documents: list[dict[str, Any]]) -> None:
-        if not documents:
-            raise ValueError("BM25 documents cannot be empty")
-
-        self.documents = documents
-        tokenized_corpus = [document["tokens"] for document in documents]
-        self.model = BM25Okapi(tokenized_corpus)
-
-    @classmethod
-    def from_chunks(cls, chunks: list[dict[str, Any]]) -> "BM25Index":
-        """把 section title 和正文一起加入 BM25 文档。"""
-        documents: list[dict[str, Any]] = []
-
-        for chunk in chunks:
-            section_title = " > ".join(chunk.get("section_path") or [])
-            searchable_text = f"{section_title}\n{chunk.get('text', '')}"
-
-            documents.append(
-                {
-                    "tokens": tokenize(searchable_text),
-                    # 保存完整 payload，之后无需再次查 Chunk 文件。
-                    "payload": chunk,
-                }
-            )
-
-        return cls(documents)
-
-    def save(self, path: Path) -> None:
-        """使用 gzip JSON 保存，避免不安全的 pickle。"""
-        path.parent.mkdir(parents=True, exist_ok=True)
-        artifact = {
-            "schema_version": self.schema_version,
-            "documents": self.documents,
-        }
-
-        with gzip.open(path, "wt", encoding="utf-8") as handle:
-            json.dump(artifact, handle, ensure_ascii=False)
-
-    @classmethod
-    def load(cls, path: Path) -> "BM25Index":
-        """加载 token 化语料并重新计算 BM25 统计量。"""
-        with gzip.open(path, "rt", encoding="utf-8") as handle:
-            artifact = json.load(handle)
-
-        if artifact.get("schema_version") != cls.schema_version:
-            raise ValueError("Unsupported BM25 index schema")
-
-        return cls(artifact["documents"])
-
-    def search(self, query: str, limit: int = 10) -> list[BM25Hit]:
-        """返回 BM25 分数最高的结果。"""
-        query_tokens = tokenize(query)
-        if not query_tokens or limit <= 0:
-            return []
-
-        scores = self.model.get_scores(query_tokens)
-        top_indices = heapq.nlargest(
-            min(limit, len(scores)),
-            range(len(scores)),
-            key=lambda index: float(scores[index]),
-        )
-
-        # 分数不大于 0 表示没有有效的词法匹配，不返回噪声结果。
-        return [
-            BM25Hit(
-                score=float(scores[index]),
-                payload=self.documents[index]["payload"],
-            )
-            for index in top_indices
-            if float(scores[index]) > 0
-        ]
-```
-
+文件：retrieval/bm25_store.py
 为什么标题和正文一起索引：用户可能问“Qdrant collection 的向量维度”，关键词只出现在章节标题。只索引正文会损失这类信号。
 
 为什么不使用 pickle：pickle 加载时可以执行任意 Python 对象，不适合加载来源不可信的索引文件。JSON gzip 更透明、安全、可检查。代价是加载时需要重新构造 BM25 统计量；对一千个 Chunk 可以接受。
 
 ## 6. 第二步：建立 BM25 索引（约 15 分钟）
-
-请创建：
-
-```text
+文件：
 scripts/build_bm25_index.py
-```
-
-```python
-"""从 section Chunk 建立 BM25 索引。"""
-
-from __future__ import annotations
-
-import argparse
-import hashlib
-import json
-import sys
-from datetime import UTC, datetime
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from retrieval.bm25_store import BM25Index  # noqa: E402
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--chunks",
-        type=Path,
-        default=ROOT / "data/processed/chunks_section.jsonl",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=ROOT / "data/index/bm25/opspilot_bm25_v1.json.gz",
-    )
-    parser.add_argument(
-        "--manifest",
-        type=Path,
-        default=ROOT / "data/manifest/bm25_index.json",
-    )
-    args = parser.parse_args()
-
-    chunks = [
-        json.loads(line)
-        for line in args.chunks.read_text(encoding="utf-8").splitlines()
-        if line
-    ]
-    index = BM25Index.from_chunks(chunks)
-    index.save(args.output)
-
-    manifest = {
-        "generated_at": datetime.now(UTC).isoformat(),
-        "index_version": "bm25-v1",
-        "source_chunks": str(args.chunks.relative_to(ROOT)),
-        "source_sha256": sha256_file(args.chunks),
-        "documents": len(chunks),
-        "index_path": str(args.output.relative_to(ROOT)),
-        "index_sha256": sha256_file(args.output),
-    }
-    args.manifest.parent.mkdir(parents=True, exist_ok=True)
-    args.manifest.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(json.dumps(manifest, ensure_ascii=False, indent=2))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-```
-
-运行：
-
-```powershell
-.\.venv\Scripts\python.exe scripts\build_bm25_index.py
-```
-
 验收：`documents` 应与 section Chunk 数量一致；manifest 中保存输入和索引 SHA-256，这样能确认之后的实验使用同一份数据。
 
 ## 7. 第三步：实现单独的关键词查询（约 30 分钟）
-
-请创建：
-
-```text
-scripts/query_bm25.py
-```
-
-```python
-"""在命令行中测试 BM25 关键词检索。"""
-
-from __future__ import annotations
-
-import argparse
-import json
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from retrieval.bm25_store import BM25Index  # noqa: E402
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("question")
-    parser.add_argument("--top-k", type=int, default=5)
-    parser.add_argument(
-        "--index",
-        type=Path,
-        default=ROOT / "data/index/bm25/opspilot_bm25_v1.json.gz",
-    )
-    args = parser.parse_args()
-
-    index = BM25Index.load(args.index)
-    hits = index.search(args.question, limit=args.top_k)
-
-    print(
-        json.dumps(
-            [
-                {
-                    "score": hit.score,
-                    "chunk_id": hit.payload["chunk_id"],
-                    "product": hit.payload.get("product"),
-                    "section_path": hit.payload.get("section_path"),
-                    "text_preview": hit.payload.get("text", "")[:300],
-                }
-                for hit in hits
-            ],
-            ensure_ascii=False,
-            indent=2,
-        )
-    )
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-```
+文件：scripts/query_bm25.py
+这一步是在做 BM25 的“单问题冒烟测试”：确认索引能正常加载、关键词能被正确切分，并观察关键词检索返回的 Top-5 Chunk 是否合理。这里没有使用embedding、Qdrant向量相似度、大模型和reranker。实际流程:
+输入问题
+  ↓
+使用与建库相同的 tokenizer 分词
+  ↓
+BM25 计算问题与全部 Chunk 的关键词相关性
+  ↓
+按 BM25 分数降序排列
+  ↓
+输出 Top-5 Chunk
 
 运行两个问题对比：
 
@@ -389,8 +117,66 @@ if __name__ == "__main__":
 .\.venv\Scripts\python.exe scripts\query_bm25.py `
   "显存不够怎么办" --top-k 5
 ```
+第一条结果输出举例：
+{
+  "score": 8.713856469726062,  #BM25 相关性分数。分数越高，说明该 Chunk 与查询词的词法匹配越强。
+  "chunk_id": "pytorch-001:section:0053",
+  "product": "pytorch",
+  "section_path": [
+    "CUDA semantics #",
+    "Best practices #",
+    "Device-agnostic code #"#表示 Chunk 在原文档中的章节层级。
+它帮助我们判断结果是否只是“关键词相同”，还是章节主题也真正相关。
+  ],
+  "text_preview": "..." #这是 Chunk 正文的前 300 个字符，方便在终端快速检查结果。
+}
 
-预期：精确 API 问题较容易命中；纯中文同义表达可能很差。这不是程序错误，而是 BM25 的跨语言局限。
+结果分析：精确关键词召回成功，但细粒度排序质量一般。产品级召回正确：5 条全部属于 PyTorch；
+API 相关页面进入 Top-5；
+直接定义页面进入了 Top-5；
+最直接的答案只排第 5；
+部分结果是导航页和网站样板内容；
+BM25 擅长找“出现这个词的页面”，不一定能判断“哪个页面最能回答问题”。
+
+第二条输出结果及分析：
+返回：
+[]
+这不是程序报错，而是表示：
+BM25 没有找到分数大于 0 的 Chunk。
+中文问题没有召回结果，因为知识库技术文档主要是英文，中英文没有词法交集因此返回[]。直接证明了：
+BM25 擅长精确关键词，但不理解同义表达，也不理解中英文之间的语义对应。
+
+它不知道：
+显存不够
+≈ GPU out of memory
+≈ CUDA OOM
+
+共同分析两组问题探究BM25的特点和问题：
+查询问题	                   BM25结果	         说明
+torch.cuda.is_available	 返回5条PyTorch结果	精确技术标识符召回能力强
+显存不够怎么办	              []	        中文和英文之间没有共同关键词
+
+
+因此，BM25 不能单独作为 OpsPilot 的最终检索器。
+合理架构是：
+中文用户问题
+  ├─ Dense Retrieval：负责语义、同义表达和跨语言
+  └─ BM25：负责命令、错误码、版本号和精确关键词
+              ↓
+            RRF融合
+              ↓
+         Cross-Encoder重排
+
+不过当前的 Dense Retriever 是 hash-v1，它同样不擅长真正的跨语言语义。后续使用 BGE-M3 或多语言 E5 后，Dense 路径才能更有效地补救中文查询。
+总结：BM25 单问题查询实验
+
+本实验使用 query_bm25.py 对已建立的 BM25 索引进行关键词检索冒烟测试。查询过程不使用 Embedding、Qdrant 向量相似度或生成模型，而是将问题按照与索引一致的 tokenizer 进行分词，然后计算问题与全部 Chunk 的 BM25 相关性分数，并返回分数最高的 Top-5 Chunk。
+
+对于精确技术标识符 torch.cuda.is_available，BM25 返回的五条结果全部来自 PyTorch 文档，说明技术 API 被 tokenizer 正确保留，BM25 索引和关键词查询流程能够正常工作。其中 API 定义相关 Chunk 进入了 Top-5，但只排在第 5 位；部分排名更高的结果只是包含相同 API 名称的最佳实践、导航或资源页面。这说明 BM25 擅长寻找包含相同关键词的文档，但不能充分理解用户希望获得的是 API 定义、使用方法还是副作用，细粒度排序仍有改进空间。
+
+对于中文查询“显存不够怎么办”，BM25 返回空列表。知识库文档主要使用英文表达，例如 “CUDA out of memory” 或 “GPU memory”，中文查询 token 与英文文档不存在直接词法交集，因此所有 BM25 分数为 0。该结果不是程序失败，而是 BM25 不具备同义表达和跨语言语义理解能力的体现。
+
+两组查询共同说明：BM25 适合召回命令、API、错误码、配置项和版本号等精确技术标识符，但不适合单独处理中文自然语言与英文技术文档之间的语义匹配。本项目后续需要将 BM25 与 Dense Retrieval 结合，通过 RRF 合并两路候选，再使用 Cross-Encoder Reranker 改善细粒度排序。
 
 ## 8. 第四步：实现 RRF 融合（约 45 分钟）
 
@@ -398,7 +184,7 @@ if __name__ == "__main__":
 
 Dense 余弦分数可能在 `0.1～0.8`，BM25 分数可能在 `0～20`。直接相加没有意义。加权融合必须先做 min-max、z-score 或其他校准，而且校准结果会随查询改变。
 
-RRF（Reciprocal Rank Fusion）只使用排名：
+RRF（Reciprocal Rank Fusion互逆排序融合）只使用排名：
 
 ```text
 RRF分数(chunk) = Σ weight / (rrf_k + rank)
@@ -409,298 +195,17 @@ RRF分数(chunk) = Σ weight / (rrf_k + rank)
 ```text
 1 / (60 + 2) + 1 / (60 + 5)
 ```
-
 它不要求两种分数在同一量纲，所以适合作为第一版混合检索。`rrf_k=60` 是平滑常数：值越大，前几名与后几名的差距越缓和。不要把它与检索 `top_k` 混淆。
 
-请创建：
-
-```text
+文件：
 retrieval/hybrid_search.py
-```
-
-```python
-"""使用 RRF 融合 Dense 与 BM25 结果。"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any
-
-from retrieval.bm25_store import BM25Hit
-from retrieval.qdrant_store import SearchHit
-
-
-@dataclass(frozen=True)
-class HybridHit:
-    score: float
-    payload: dict[str, Any]
-    dense_rank: int | None
-    bm25_rank: int | None
-
-
-def reciprocal_rank_fusion(
-    dense_hits: list[SearchHit],
-    bm25_hits: list[BM25Hit],
-    limit: int = 10,
-    rrf_k: int = 60,
-    dense_weight: float = 1.0,
-    bm25_weight: float = 1.0,
-) -> list[HybridHit]:
-    """按 Chunk ID 合并两路排名。"""
-    if rrf_k <= 0:
-        raise ValueError("rrf_k must be positive")
-
-    merged: dict[str, dict[str, Any]] = {}
-
-    for rank, hit in enumerate(dense_hits, start=1):
-        chunk_id = str(hit.payload["chunk_id"])
-        item = merged.setdefault(
-            chunk_id,
-            {
-                "score": 0.0,
-                "payload": hit.payload,
-                "dense_rank": None,
-                "bm25_rank": None,
-            },
-        )
-        item["score"] += dense_weight / (rrf_k + rank)
-        item["dense_rank"] = rank
-
-    for rank, hit in enumerate(bm25_hits, start=1):
-        chunk_id = str(hit.payload["chunk_id"])
-        item = merged.setdefault(
-            chunk_id,
-            {
-                "score": 0.0,
-                "payload": hit.payload,
-                "dense_rank": None,
-                "bm25_rank": None,
-            },
-        )
-        item["score"] += bm25_weight / (rrf_k + rank)
-        item["bm25_rank"] = rank
-
-    ranked = sorted(
-        merged.values(),
-        key=lambda item: item["score"],
-        reverse=True,
-    )[:limit]
-
-    return [
-        HybridHit(
-            score=float(item["score"]),
-            payload=item["payload"],
-            dense_rank=item["dense_rank"],
-            bm25_rank=item["bm25_rank"],
-        )
-        for item in ranked
-    ]
-```
 
 优点：实现简单、对分数尺度不敏感、容易解释。缺点：丢弃了原始分数的置信度；两个检索器中“第 1 名比第 2 名强很多”的信息不会被利用。后续数据足够时，可以在 validation 集上校准加权融合，但不能在 test 集反复调权重。
 
 ## 9. 第五步：比较 Dense、BM25 与 Hybrid（约 60 分钟）
 
-请创建 `scripts/evaluate_day8_hybrid.py`。为避免复制 Day 7 的全部评测代码，这个脚本复用已有指标函数。
-
-```python
-"""在同一评测集上比较 Dense、BM25 和 RRF Hybrid。"""
-
-from __future__ import annotations
-
-import argparse
-import json
-import statistics
-import sys
-from pathlib import Path
-from time import perf_counter
-from typing import Any
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from evaluation.retrieval_metrics import (  # noqa: E402
-    hit_rate_at_k,
-    recall_at_k,
-    reciprocal_rank_at_k,
-)
-from retrieval.bm25_store import BM25Index  # noqa: E402
-from retrieval.embeddings import create_embedding_provider  # noqa: E402
-from retrieval.hybrid_search import reciprocal_rank_fusion  # noqa: E402
-from retrieval.qdrant_store import QdrantVectorStore  # noqa: E402
-
-
-def load_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line
-    ]
-
-
-def p95(values: list[float]) -> float:
-    """返回简单的 nearest-rank P95。"""
-    ordered = sorted(values)
-    index = max(0, int(0.95 * len(ordered) + 0.9999) - 1)
-    return ordered[index]
-
-
-def summarize_latency(values: list[float]) -> dict[str, float]:
-    return {
-        "mean_ms": round(statistics.mean(values), 3),
-        "p50_ms": round(statistics.median(values), 3),
-        "p95_ms": round(p95(values), 3),
-    }
-
-
-def summarize_metrics(
-    rows: list[dict[str, Any]],
-    method: str,
-    cutoffs: list[int],
-) -> dict[str, dict[str, float]]:
-    summary: dict[str, dict[str, float]] = {}
-    for k in cutoffs:
-        recall_values: list[float] = []
-        hit_values: list[float] = []
-        mrr_values: list[float] = []
-
-        for row in rows:
-            retrieved = row["retrieved_ids"][method]
-            gold = row["gold_ids"]
-            recall_values.append(recall_at_k(gold, retrieved, k))
-            hit_values.append(hit_rate_at_k(gold, retrieved, k))
-            mrr_values.append(reciprocal_rank_at_k(gold, retrieved, k))
-
-        summary[str(k)] = {
-            "recall_at_k": round(statistics.mean(recall_values), 4),
-            "hit_rate_at_k": round(statistics.mean(hit_values), 4),
-            "mrr_at_k": round(statistics.mean(mrr_values), 4),
-        }
-    return summary
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--candidate-k", type=int, default=20)
-    parser.add_argument("--rrf-k", type=int, default=60)
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=ROOT / "data/eval/day8_retrieval_comparison.json",
-    )
-    args = parser.parse_args()
-
-    eval_path = ROOT / "data/eval/day6_eval.jsonl"
-    bm25_path = ROOT / "data/index/bm25/opspilot_bm25_v1.json.gz"
-    records = [
-        row
-        for row in load_jsonl(eval_path)
-        if row.get("answerability") == "answerable"
-    ]
-
-    provider = create_embedding_provider(
-        provider="hash", model_name="", dimension=384, device="cpu"
-    )
-    dense_store = QdrantVectorStore(
-        ROOT / "data/index/qdrant",
-        "opspilot_chunks_v1",
-        provider.dimension,
-    )
-    bm25_store = BM25Index.load(bm25_path)
-
-    rows: list[dict[str, Any]] = []
-    try:
-        for record in records:
-            question = record["question"]
-            gold_ids = [item["chunk_id"] for item in record["gold_evidence"]]
-
-            start = perf_counter()
-            query_vector = provider.encode([question])[0]
-            dense_hits = dense_store.search(
-                query_vector,
-                limit=args.candidate_k,
-                query_text="",  # 保持 Day 7 dense-only 定义
-            )
-            dense_ms = (perf_counter() - start) * 1000
-
-            start = perf_counter()
-            bm25_hits = bm25_store.search(question, limit=args.candidate_k)
-            bm25_ms = (perf_counter() - start) * 1000
-
-            start = perf_counter()
-            hybrid_hits = reciprocal_rank_fusion(
-                dense_hits,
-                bm25_hits,
-                limit=args.candidate_k,
-                rrf_k=args.rrf_k,
-            )
-            fusion_ms = (perf_counter() - start) * 1000
-
-            rows.append(
-                {
-                    "id": record["id"],
-                    "question": question,
-                    "gold_ids": gold_ids,
-                    "retrieved_ids": {
-                        "dense": [hit.payload["chunk_id"] for hit in dense_hits],
-                        "bm25": [hit.payload["chunk_id"] for hit in bm25_hits],
-                        "hybrid": [hit.payload["chunk_id"] for hit in hybrid_hits],
-                    },
-                    "latency_ms": {
-                        "dense": dense_ms,
-                        "bm25": bm25_ms,
-                        # 当前是顺序调用，因此端到端延迟使用求和。
-                        "hybrid_sequential": dense_ms + bm25_ms + fusion_ms,
-                        # 如果以后真正并行，理论近似为较慢分支+融合时间。
-                        "hybrid_parallel_estimate": max(dense_ms, bm25_ms) + fusion_ms,
-                    },
-                }
-            )
-    finally:
-        dense_store.close()
-
-    cutoffs = [1, 3, 5, 10]
-    methods = ["dense", "bm25", "hybrid"]
-    result = {
-        "config": {
-            "candidate_k": args.candidate_k,
-            "rrf_k": args.rrf_k,
-            "evaluated_questions": len(rows),
-        },
-        "metrics": {
-            method: summarize_metrics(rows, method, cutoffs)
-            for method in methods
-        },
-        "latency": {
-            name: summarize_latency(
-                [row["latency_ms"][name] for row in rows]
-            )
-            for name in [
-                "dense",
-                "bm25",
-                "hybrid_sequential",
-                "hybrid_parallel_estimate",
-            ]
-        },
-        "per_query": rows,
-    }
-
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(json.dumps({k: result[k] for k in ["config", "metrics", "latency"]},
-                     ensure_ascii=False, indent=2))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-```
-
-运行：
-
+文件`scripts/evaluate_day8_hybrid.py`。
+该文件在同一评测集上比较 Dense、BM25 和 RRF Hybrid。
 ```powershell
 .\.venv\Scripts\python.exe scripts\evaluate_day8_hybrid.py `
   --candidate-k 20 --rrf-k 60
@@ -709,45 +214,59 @@ if __name__ == "__main__":
 分析时填写：
 
 | 方法 | Recall@5 | Hit Rate@5 | MRR@5 | P50延迟 | P95延迟 |
-|---|---:|---:|---:|---:|---:|
-| Dense | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 |
-| BM25 | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 |
-| Hybrid RRF | 待填写 | 待填写 | 待填写 | 待填写 | 待填写 |
+| Dense | 0.1865 | 0.2143 | 0.1437 | 2.919ms | 3.359ms |
+| BM25 |0.1984 | 0.2143| 0.1397 | 3.795 ms | 6.136ms |
+| Hybrid RRF | 0.2341 | 0.2619 | 0.1754 | 6.937ms | 9.814ms |
 
 不要预设 Hybrid 一定最好。中文问题与英文文档没有共同词时，BM25 可能贡献很少；这本身就是有效实验结论。
+分析：
+在 Top-5 指标上，Hybrid RRF 是三种方案中效果最好的：
+找回的标准证据更多；
+至少命中一条正确证据的问题更多；
+正确证据的平均排名更靠前。
+但它的实际顺序调用延迟也是最高的。
+这说明 Hybrid RRF 带来了比较明确的质量提升，代价是同时调用 Dense 和 BM25 后产生的额外延迟。
+BM25 的 Recall@5 相比Dense略高，说明它找回了更多 gold Chunk，特别可能来自：
+命令名称；
+API 名称；
+错误码；
+配置项；
+版本号；
+产品名称。
+Hybrid：让dense和BM25实现优势互补：
+Dense：
+负责模糊相似、部分语义关系
+BM25：
+负责API、命令、版本号、错误码等精确匹配
+
+根据当前结果，建议：
+第一阶段召回：
+Dense Top-20 + BM25 Top-20
+
+第二阶段融合：
+RRF，rrf_k=60
+
+第三阶段：
+Reranker将Hybrid Top-20重排为最终Top-5
+
+Dense Retrieval的延迟最低，但当前系统使用的hash-v1不具备充分的语义和跨语言理解能力，因此Top-5召回质量有限。BM25的Recall@5略高于Dense，说明精确命令、API名称、错误码和版本号等词法信号能够补充部分证据；但BM25的Hit Rate@5与Dense相同，MRR@5略低，表明它虽然能够找到包含相同关键词的Chunk，却不一定能将最能回答问题的Chunk排在前面。
+
+Hybrid RRF在三个Top-5质量指标上均取得最佳结果。相比Dense，Recall@5从0.1865提高到0.2341，相对提升约25.5%；Hit Rate@5从0.2143提高到0.2619，相对提升约22.2%；MRR@5从0.1437提高到0.1754，相对提升约22.1%。42条问题中，Dense和BM25分别约有9条问题在Top-5至少命中一条gold evidence，而Hybrid约有11条，说明融合增加了约2条问题的有效命中。
+
+在Top-10上，BM25的Recall和Hit Rate分别达到0.3294和0.3810，高于Hybrid的0.3056和0.3571；但Hybrid的MRR@10达到0.1881，高于BM25的0.1600。这说明BM25在较大的候选集合中覆盖了更多精确关键词证据，而RRF更有利于把两路检索器共同认可的结果提升到前面。由于RAG最终只能将少量Chunk送入生成模型，Hybrid在Top-5和MRR上的优势具有实际价值；同时可以保留Hybrid Top-20供后续Cross-Encoder Reranker进一步精排。
+
+延迟方面，Dense的P50和P95分别为2.919 ms和3.350 ms，BM25为3.795 ms和6.136 ms。当前Hybrid采用顺序调用，P50为6.937 ms，P95为9.814 ms。根据平均延迟估算，RRF融合本身只消耗约0.066 ms，主要开销来自Dense与BM25两路检索。若未来真正并行调用，理论P50约为3.858 ms、P95约为6.208 ms；该数值目前只是估计，不能作为实际并行延迟报告。（P代表Percentile,即百分位数。假设你对42个问题分别测量检索时间，得到42个延迟值，然后从小到大排列P50 表示：50%的请求延迟不超过这个值，另外50%的请求比它慢。P95尾延迟：95%的请求延迟不超过这个值，最慢的5%请求超过它。）
+
+综合质量和延迟，本项目暂时选择Dense Top-20与BM25 Top-20并行召回、使用RRF（rrf_k=60）融合，然后由Reranker将候选重排为最终Top-5。后续需要在validation集上比较不同RRF参数和候选数量，并单独测量真实并行调用的端到端延迟。
+
+
 
 ## 10. Day 8 测试与验收
-
-请创建 `tests/test_hybrid_retrieval.py`：
-
-```python
-from retrieval.bm25_store import BM25Hit, tokenize
-from retrieval.hybrid_search import reciprocal_rank_fusion
-from retrieval.qdrant_store import SearchHit
-
-
-def payload(chunk_id: str) -> dict[str, str]:
-    return {"chunk_id": chunk_id, "text": chunk_id}
-
-
-def test_tokenizer_preserves_technical_identifier() -> None:
-    assert "torch.cuda.is_available" in tokenize("Use torch.cuda.is_available now")
-
-
-def test_rrf_rewards_results_found_by_both_retrievers() -> None:
-    dense = [
-        SearchHit(score=0.8, payload=payload("dense-only")),
-        SearchHit(score=0.7, payload=payload("shared")),
-    ]
-    bm25 = [
-        BM25Hit(score=9.0, payload=payload("bm25-only")),
-        BM25Hit(score=8.0, payload=payload("shared")),
-    ]
-
-    fused = reciprocal_rank_fusion(dense, bm25, limit=3, rrf_k=60)
-    assert fused[0].payload["chunk_id"] == "shared"
-```
-
+ `tests/test_hybrid_retrieval.py`：
+这个文件是混合检索模块的单元测试，主要检查：
+tokenizer是否保留技术标识符；
+RRF是否正确融合Dense和BM25排名；
+两路检索都找到的Chunk是否会获得更高的融合分数。
 运行：
 
 ```powershell
@@ -758,7 +277,10 @@ def test_rrf_rewards_results_found_by_both_retrievers() -> None:
 
 .\.venv\Scripts\python.exe -m pytest -q
 ```
-
+结果：Found 3 errors.
+[*] 3 fixable with the `--fix` option.
+..................                                                                                               [100%]
+18 passed in 2.48s
 ---
 
 # Day 9：Reranker 重排序
@@ -794,8 +316,7 @@ max_length = 512 tokens
 
 ```text
 Reranker后的Hit@5 ≤ 候选集合的Hit@20上限
-```
-
+``
 Reranker主要改善 Top-5 的 MRR 和 Hit Rate；它不应该改变候选 Top-20 的 Recall，因为只是重新排序同一批候选。
 
 ## 13. 模型选择
@@ -817,302 +338,17 @@ BAAI/bge-reranker-v2-m3
 
 ## 14. 第一步：实现 Reranker（约 60 分钟）
 
-请创建：
-
-```text
 retrieval/reranker.py
-```
-
-```python
-"""Cross-Encoder Reranker。"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any, Protocol
-
-import numpy as np
-from sentence_transformers import CrossEncoder
-
-
-class Candidate(Protocol):
-    score: float
-    payload: dict[str, Any]
-
-
-@dataclass(frozen=True)
-class RerankedHit:
-    reranker_score: float
-    retrieval_score: float
-    original_rank: int
-    payload: dict[str, Any]
-
-
-def rank_by_scores(
-    candidates: list[Candidate], scores: list[float]
-) -> list[RerankedHit]:
-    """把模型分数与候选绑定并按分数降序排列。"""
-    if len(candidates) != len(scores):
-        raise ValueError("Candidate and score counts differ")
-
-    ranked = [
-        RerankedHit(
-            reranker_score=float(score),
-            retrieval_score=float(candidate.score),
-            original_rank=rank,
-            payload=candidate.payload,
-        )
-        for rank, (candidate, score) in enumerate(
-            zip(candidates, scores, strict=True), start=1
-        )
-    ]
-    return sorted(ranked, key=lambda hit: hit.reranker_score, reverse=True)
-
-
-class CrossEncoderReranker:
-    def __init__(
-        self,
-        model_name: str,
-        device: str,
-        batch_size: int = 8,
-        max_length: int = 512,
-    ) -> None:
-        self.model_name = model_name
-        self.batch_size = batch_size
-        self.model = CrossEncoder(
-            model_name,
-            device=device,
-            max_length=max_length,
-        )
-
-    def rerank(
-        self,
-        query: str,
-        candidates: list[Candidate],
-        top_n: int = 5,
-    ) -> list[RerankedHit]:
-        if not candidates or top_n <= 0:
-            return []
-
-        pairs = [
-            (query, str(candidate.payload.get("text", "")))
-            for candidate in candidates
-        ]
-        raw_scores = self.model.predict(
-            pairs,
-            batch_size=self.batch_size,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-        )
-        scores = np.asarray(raw_scores).reshape(-1).astype(float).tolist()
-        return rank_by_scores(candidates, scores)[:top_n]
-```
-
 为什么使用 raw logits 而不强制 sigmoid：重排序只关心相对顺序，sigmoid 是单调函数，不会改变排名。需要把分数展示为概率时才考虑归一化，但 reranker score 通常不应直接解释成真实概率。
 
-## 15. 第二步：先做单问题冒烟测试（约 20 分钟）
-
-创建 `scripts/query_reranker.py` 时，可以复用 Day 8 的 Hybrid 候选。核心调用如下：
-
-```python
-import torch
-
-from retrieval.reranker import CrossEncoderReranker
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-batch_size = 8 if device == "cuda" else 2
-
-reranker = CrossEncoderReranker(
-    model_name="BAAI/bge-reranker-v2-m3",
-    device=device,
-    batch_size=batch_size,
-    max_length=512,
-)
-
-# hybrid_hits 是 Day 8 reciprocal_rank_fusion 返回的 Top-20。
-reranked = reranker.rerank(question, hybrid_hits[:20], top_n=5)
-
-for hit in reranked:
-    print(
-        hit.reranker_score,
-        hit.original_rank,
-        hit.payload["chunk_id"],
-    )
-```
-
+## 15. 第二步：先做单问题冒烟测试
+ `scripts/query_reranker.py` 
 第一次运行需要下载模型，不能把下载耗时算进稳定推理延迟。先加载模型并做一次 warm-up，再正式计时。
 
-## 16. 第三步：运行有无 Reranker 的严格对照（约 60 分钟）
-
+## 16. 第三步：运行有无 Reranker 的严格对照
 Day 8 的 `day8_retrieval_comparison.json` 已保存每个问题的 Hybrid 候选 ID。Day 9 应固定这批候选，避免重新检索导致候选变化。请创建：
 
-```text
 scripts/evaluate_day9_reranker.py
-```
-
-```python
-"""对 Day 8 固定候选运行 Reranker A/B 实验。"""
-
-from __future__ import annotations
-
-import argparse
-import json
-import statistics
-import sys
-from dataclasses import dataclass
-from pathlib import Path
-from time import perf_counter
-from typing import Any
-
-import torch
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from evaluation.retrieval_metrics import (  # noqa: E402
-    hit_rate_at_k,
-    recall_at_k,
-    reciprocal_rank_at_k,
-)
-from retrieval.reranker import CrossEncoderReranker  # noqa: E402
-
-
-@dataclass(frozen=True)
-class CachedCandidate:
-    score: float
-    payload: dict[str, Any]
-
-
-def mean_metric(rows: list[dict[str, Any]], key: str) -> float:
-    return round(statistics.mean(row[key] for row in rows), 4)
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--candidate-k", type=int, default=20)
-    parser.add_argument("--final-k", type=int, default=5)
-    parser.add_argument("--batch-size", type=int, default=0)
-    parser.add_argument(
-        "--model",
-        default="BAAI/bge-reranker-v2-m3",
-    )
-    parser.add_argument(
-        "--day8-result",
-        type=Path,
-        default=ROOT / "data/eval/day8_retrieval_comparison.json",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=ROOT / "data/eval/day9_reranker_comparison.json",
-    )
-    args = parser.parse_args()
-
-    chunks = [
-        json.loads(line)
-        for line in (ROOT / "data/processed/chunks_section.jsonl")
-        .read_text(encoding="utf-8")
-        .splitlines()
-        if line
-    ]
-    chunk_by_id = {chunk["chunk_id"]: chunk for chunk in chunks}
-    day8 = json.loads(args.day8_result.read_text(encoding="utf-8"))
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    batch_size = args.batch_size or (8 if device == "cuda" else 2)
-    reranker = CrossEncoderReranker(
-        args.model,
-        device=device,
-        batch_size=batch_size,
-        max_length=512,
-    )
-
-    # Warm-up：不纳入正式延迟。
-    first = day8["per_query"][0]
-    warm_ids = first["retrieved_ids"]["hybrid"][:2]
-    warm_candidates = [
-        CachedCandidate(score=0.0, payload=chunk_by_id[chunk_id])
-        for chunk_id in warm_ids
-    ]
-    reranker.rerank(first["question"], warm_candidates, top_n=2)
-
-    rows: list[dict[str, Any]] = []
-    for item in day8["per_query"]:
-        candidate_ids = item["retrieved_ids"]["hybrid"][: args.candidate_k]
-        candidates = [
-            # 缓存文件没有保存完整RRF分数；本实验只需要原始顺序。
-            CachedCandidate(score=1.0 / rank, payload=chunk_by_id[chunk_id])
-            for rank, chunk_id in enumerate(candidate_ids, start=1)
-        ]
-
-        start = perf_counter()
-        reranked = reranker.rerank(
-            item["question"], candidates, top_n=args.final_k
-        )
-        rerank_ms = (perf_counter() - start) * 1000
-
-        baseline_ids = candidate_ids[: args.final_k]
-        reranked_ids = [hit.payload["chunk_id"] for hit in reranked]
-        gold_ids = item["gold_ids"]
-
-        rows.append(
-            {
-                "id": item["id"],
-                "baseline_ids": baseline_ids,
-                "reranked_ids": reranked_ids,
-                "candidate_recall": recall_at_k(
-                    gold_ids, candidate_ids, args.candidate_k
-                ),
-                "baseline_hit": hit_rate_at_k(
-                    gold_ids, baseline_ids, args.final_k
-                ),
-                "reranked_hit": hit_rate_at_k(
-                    gold_ids, reranked_ids, args.final_k
-                ),
-                "baseline_mrr": reciprocal_rank_at_k(
-                    gold_ids, baseline_ids, args.final_k
-                ),
-                "reranked_mrr": reciprocal_rank_at_k(
-                    gold_ids, reranked_ids, args.final_k
-                ),
-                "rerank_ms": rerank_ms,
-            }
-        )
-
-    result = {
-        "config": {
-            "model": args.model,
-            "device": device,
-            "batch_size": batch_size,
-            "candidate_k": args.candidate_k,
-            "final_k": args.final_k,
-        },
-        "metrics": {
-            "candidate_recall": mean_metric(rows, "candidate_recall"),
-            "baseline_hit_at_final_k": mean_metric(rows, "baseline_hit"),
-            "reranked_hit_at_final_k": mean_metric(rows, "reranked_hit"),
-            "baseline_mrr_at_final_k": mean_metric(rows, "baseline_mrr"),
-            "reranked_mrr_at_final_k": mean_metric(rows, "reranked_mrr"),
-        },
-        "latency": {
-            "mean_ms": round(statistics.mean(row["rerank_ms"] for row in rows), 3),
-            "p50_ms": round(statistics.median(row["rerank_ms"] for row in rows), 3),
-            "max_ms": round(max(row["rerank_ms"] for row in rows), 3),
-        },
-        "per_query": rows,
-    }
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(json.dumps({k: result[k] for k in ["config", "metrics", "latency"]},
-                     ensure_ascii=False, indent=2))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-```
 
 运行：
 
@@ -1133,29 +369,7 @@ if __name__ == "__main__":
 
 ## 17. Day 9 测试
 
-向 `tests/test_hybrid_retrieval.py` 增加不下载模型的排序测试：
-
-```python
-from dataclasses import dataclass
-
-from retrieval.reranker import rank_by_scores
-
-
-@dataclass
-class FakeCandidate:
-    score: float
-    payload: dict[str, str]
-
-
-def test_rank_by_scores_uses_reranker_score() -> None:
-    candidates = [
-        FakeCandidate(0.9, {"chunk_id": "old-first"}),
-        FakeCandidate(0.1, {"chunk_id": "new-first"}),
-    ]
-    reranked = rank_by_scores(candidates, [0.2, 0.8])
-    assert reranked[0].payload["chunk_id"] == "new-first"
-    assert reranked[0].original_rank == 2
-```
+向 `tests/test_hybrid_retrieval.py` 增加不下载模型的排序测试
 
 不在单元测试中下载真实模型，因为这会让测试依赖网络、耗时长并产生缓存。真实模型加载放在冒烟测试和对照实验中。
 
@@ -1250,17 +464,6 @@ max(T_dense, T_bm25) + T_fusion
 
 Reranker 降级原则：它只负责改善排序，因此失败时使用 Hybrid 原排序仍能提供服务；不能因为可选精排失败就让整个问答系统完全不可用。
 
-## 22. 两天的时间安排
-
-### Day 8（4小时）
-
-| 时间 | 任务 | 交付 |
-|---|---|---|
-| 0:00–1:00 | 实现 tokenizer、BM25Index、构建脚本 | BM25 索引与 manifest |
-| 1:00–1:30 | 实现 query_bm25 并抽查 | 关键词查询结果 |
-| 1:30–2:30 | 实现 RRF 和单元测试 | Hybrid 模块 |
-| 2:30–3:30 | 跑 Dense/BM25/Hybrid 对照 | 指标与 per-query 结果 |
-| 3:30–4:00 | 分析指标和延迟 | 实验表与结论 |
 
 ### Day 9（4小时）
 

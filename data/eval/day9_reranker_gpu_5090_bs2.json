@@ -1,0 +1,989 @@
+{
+  "config": {
+    "model": "BAAI/bge-reranker-v2-m3",
+    "device": "cuda",
+    "batch_size": 2,
+    "candidate_k": 20,
+    "final_k": 5
+  },
+  "metrics": {
+    "candidate_recall": 0.3889,
+    "baseline_hit_at_final_k": 0.2619,
+    "reranked_hit_at_final_k": 0.4286,
+    "baseline_mrr_at_final_k": 0.1754,
+    "reranked_mrr_at_final_k": 0.3591
+  },
+  "latency": {
+    "mean_ms": 146.926,
+    "p50_ms": 146.183,
+    "max_ms": 175.82
+  },
+  "per_query": [
+    {
+      "id": "d6-001",
+      "baseline_ids": [
+        "vllm-001:section:0042",
+        "docker-001:section:0015",
+        "docker-001:section:0006",
+        "fastapi-004:section:0037",
+        "docker-001:section:0007"
+      ],
+      "reranked_ids": [
+        "docker-001:section:0006",
+        "docker-008:section:0004",
+        "docker-005:section:0002",
+        "docker-005:section:0000",
+        "docker-001:section:0043"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.3333333333333333,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 147.6867701858282
+    },
+    {
+      "id": "d6-002",
+      "baseline_ids": [
+        "fastapi-004:section:0015",
+        "pytorch-003:section:0008",
+        "vllm-007:section:0010",
+        "k8s-006:section:0000",
+        "vllm-002:section:0010"
+      ],
+      "reranked_ids": [
+        "docker-004:section:0003",
+        "k8s-003:section:0047",
+        "k8s-003:section:0046",
+        "docker-004:section:0004",
+        "k8s-003:section:0045"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 147.03458780422807
+    },
+    {
+      "id": "d6-003",
+      "baseline_ids": [
+        "vllm-001:section:0042",
+        "fastapi-004:section:0011",
+        "docker-001:section:0015",
+        "docker-001:section:0006",
+        "fastapi-004:section:0016"
+      ],
+      "reranked_ids": [
+        "docker-001:section:0022",
+        "docker-008:section:0011",
+        "docker-001:section:0006",
+        "docker-008:section:0004",
+        "docker-001:section:0023"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 147.10021810606122
+    },
+    {
+      "id": "d6-004",
+      "baseline_ids": [
+        "docker-003:section:0011",
+        "docker-003:section:0010",
+        "docker-003:section:0014",
+        "docker-003:section:0015",
+        "docker-003:section:0012"
+      ],
+      "reranked_ids": [
+        "docker-003:section:0014",
+        "docker-003:section:0018",
+        "docker-003:section:0011",
+        "docker-003:section:0016",
+        "docker-003:section:0000"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 1.0,
+      "reranked_mrr": 0.3333333333333333,
+      "rerank_ms": 139.76951502263546
+    },
+    {
+      "id": "d6-005",
+      "baseline_ids": [
+        "docker-008:section:0006",
+        "docker-008:section:0004",
+        "vllm-001:section:0042",
+        "vllm-001:section:0036",
+        "docker-001:section:0006"
+      ],
+      "reranked_ids": [
+        "docker-002:section:0000",
+        "nvidia-001:section:0008",
+        "nvidia-001:section:0009",
+        "docker-001:section:0006",
+        "docker-008:section:0011"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 136.47142378613353
+    },
+    {
+      "id": "d6-006",
+      "baseline_ids": [
+        "docker-002:section:0003",
+        "k8s-003:section:0023",
+        "k8s-003:section:0016",
+        "docker-002:section:0002",
+        "k8s-003:section:0021"
+      ],
+      "reranked_ids": [
+        "docker-002:section:0003",
+        "docker-002:section:0000",
+        "docker-002:section:0001",
+        "k8s-003:section:0015",
+        "k8s-003:section:0020"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 1.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 143.34011590108275
+    },
+    {
+      "id": "d6-007",
+      "baseline_ids": [
+        "nvidia-003:section:0003",
+        "nvidia-003:section:0004",
+        "nvidia-003:section:0002",
+        "nvidia-003:section:0006",
+        "docker-007:section:0017"
+      ],
+      "reranked_ids": [
+        "nvidia-003:section:0002",
+        "nvidia-003:section:0003",
+        "nvidia-003:section:0004",
+        "nvidia-003:section:0011",
+        "nvidia-003:section:0006"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 1.0,
+      "reranked_mrr": 0.5,
+      "rerank_ms": 139.02898412197828
+    },
+    {
+      "id": "d6-008",
+      "baseline_ids": [
+        "nvidia-003:section:0003",
+        "nvidia-001:section:0013",
+        "nvidia-002:section:0000",
+        "nvidia-004:section:0000",
+        "nvidia-001:section:0000"
+      ],
+      "reranked_ids": [
+        "nvidia-005:section:0001",
+        "nvidia-005:section:0005",
+        "nvidia-005:section:0003",
+        "nvidia-005:section:0007",
+        "nvidia-001:section:0003"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 138.19355191662908
+    },
+    {
+      "id": "d6-009",
+      "baseline_ids": [
+        "pytorch-005:section:0026",
+        "pytorch-001:section:0052",
+        "pytorch-005:section:0018",
+        "pytorch-001:section:0000",
+        "vllm-001:section:0009"
+      ],
+      "reranked_ids": [
+        "pytorch-001:section:0052",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0018",
+        "vllm-001:section:0009",
+        "pytorch-005:section:0025"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.5,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 125.10328786447644
+    },
+    {
+      "id": "d6-010",
+      "baseline_ids": [
+        "pytorch-005:section:0031",
+        "pytorch-005:section:0018",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0001",
+        "pytorch-001:section:0060"
+      ],
+      "reranked_ids": [
+        "pytorch-001:section:0013",
+        "pytorch-001:section:0060",
+        "pytorch-001:section:0077",
+        "pytorch-001:section:0014",
+        "vllm-007:section:0013"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 137.83613499253988
+    },
+    {
+      "id": "d6-011",
+      "baseline_ids": [
+        "vllm-001:section:0009",
+        "pytorch-005:section:0026",
+        "vllm-001:section:0003",
+        "pytorch-001:section:0052",
+        "pytorch-001:section:0037"
+      ],
+      "reranked_ids": [
+        "pytorch-001:section:0037",
+        "vllm-001:section:0009",
+        "pytorch-001:section:0052",
+        "pytorch-001:section:0060",
+        "pytorch-005:section:0026"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 135.83380030468106
+    },
+    {
+      "id": "d6-012",
+      "baseline_ids": [
+        "pytorch-004:section:0029",
+        "pytorch-004:section:0015",
+        "pytorch-004:section:0002",
+        "pytorch-004:section:0030",
+        "pytorch-004:section:0027"
+      ],
+      "reranked_ids": [
+        "pytorch-004:section:0008",
+        "pytorch-004:section:0030",
+        "pytorch-004:section:0021",
+        "pytorch-004:section:0029",
+        "pytorch-004:section:0020"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 152.1253613755107
+    },
+    {
+      "id": "d6-013",
+      "baseline_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-002:section:0047",
+        "qdrant-004:section:0035",
+        "qdrant-004:section:0033",
+        "qdrant-002:section:0030"
+      ],
+      "reranked_ids": [
+        "qdrant-002:section:0010",
+        "qdrant-002:section:0030",
+        "qdrant-004:section:0024",
+        "qdrant-004:section:0033",
+        "qdrant-004:section:0030"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 171.1403434164822
+    },
+    {
+      "id": "d6-014",
+      "baseline_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0031",
+        "qdrant-004:section:0028",
+        "qdrant-004:section:0018",
+        "qdrant-004:section:0049"
+      ],
+      "reranked_ids": [
+        "qdrant-002:section:0021",
+        "qdrant-002:section:0030",
+        "qdrant-004:section:0024",
+        "qdrant-005:section:0010",
+        "qdrant-004:section:0031"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 157.38959982991219
+    },
+    {
+      "id": "d6-015",
+      "baseline_ids": [
+        "qdrant-004:section:0035",
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0031",
+        "qdrant-004:section:0028",
+        "qdrant-004:section:0049"
+      ],
+      "reranked_ids": [
+        "qdrant-004:section:0031",
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0010",
+        "qdrant-004:section:0024",
+        "qdrant-001:section:0002"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.5,
+      "reranked_mrr": 0.5,
+      "rerank_ms": 160.12067208066583
+    },
+    {
+      "id": "d6-016",
+      "baseline_ids": [
+        "qdrant-001:section:0002",
+        "qdrant-004:section:0035",
+        "qdrant-005:section:0013",
+        "qdrant-002:section:0030",
+        "qdrant-001:section:0003"
+      ],
+      "reranked_ids": [
+        "qdrant-005:section:0013",
+        "qdrant-005:section:0011",
+        "qdrant-005:section:0012",
+        "qdrant-001:section:0002",
+        "qdrant-005:section:0014"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.3333333333333333,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 163.57535775750875
+    },
+    {
+      "id": "d6-017",
+      "baseline_ids": [
+        "fastapi-004:section:0036",
+        "vllm-007:section:0006",
+        "fastapi-004:section:0035",
+        "nvidia-001:section:0014",
+        "fastapi-003:section:0007"
+      ],
+      "reranked_ids": [
+        "fastapi-004:section:0036",
+        "fastapi-003:section:0007",
+        "fastapi-004:section:0029",
+        "fastapi-004:section:0035",
+        "fastapi-003:section:0000"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 134.13145206868649
+    },
+    {
+      "id": "d6-018",
+      "baseline_ids": [
+        "fastapi-004:section:0011",
+        "docker-001:section:0006",
+        "vllm-001:section:0042",
+        "fastapi-004:section:0007",
+        "fastapi-004:section:0017"
+      ],
+      "reranked_ids": [
+        "fastapi-004:section:0036",
+        "fastapi-004:section:0000",
+        "vllm-001:section:0036",
+        "fastapi-004:section:0005",
+        "fastapi-004:section:0011"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 133.60322872176766
+    },
+    {
+      "id": "d6-019",
+      "baseline_ids": [
+        "fastapi-004:section:0011",
+        "fastapi-004:section:0007",
+        "fastapi-002:section:0004",
+        "fastapi-005:section:0021",
+        "fastapi-002:section:0002"
+      ],
+      "reranked_ids": [
+        "fastapi-006:section:0006",
+        "fastapi-006:section:0010",
+        "fastapi-006:section:0013",
+        "fastapi-006:section:0002",
+        "fastapi-002:section:0004"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 131.22999295592308
+    },
+    {
+      "id": "d6-020",
+      "baseline_ids": [
+        "vllm-007:section:0012",
+        "vllm-002:section:0003",
+        "vllm-002:section:0005",
+        "vllm-005:section:0002",
+        "vllm-001:section:0006"
+      ],
+      "reranked_ids": [
+        "vllm-006:section:0002",
+        "vllm-004:section:0004",
+        "vllm-004:section:0006",
+        "vllm-001:section:0029",
+        "vllm-002:section:0002"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 146.20546391233802
+    },
+    {
+      "id": "d6-021",
+      "baseline_ids": [
+        "pytorch-004:section:0008",
+        "nvidia-001:section:0013",
+        "pytorch-004:section:0009",
+        "k8s-002:section:0002",
+        "docker-006:section:0004"
+      ],
+      "reranked_ids": [
+        "k8s-002:section:0003",
+        "k8s-003:section:0056",
+        "k8s-003:section:0008",
+        "docker-004:section:0006",
+        "k8s-002:section:0002"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 134.070860221982
+    },
+    {
+      "id": "d6-022",
+      "baseline_ids": [
+        "vllm-001:section:0042",
+        "docker-008:section:0006",
+        "docker-008:section:0004",
+        "docker-001:section:0007",
+        "docker-004:section:0004"
+      ],
+      "reranked_ids": [
+        "docker-001:section:0006",
+        "docker-001:section:0007",
+        "docker-001:section:0036",
+        "nvidia-001:section:0008",
+        "nvidia-001:section:0009"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 152.18296414241195
+    },
+    {
+      "id": "d6-023",
+      "baseline_ids": [
+        "docker-003:section:0011",
+        "docker-003:section:0010",
+        "docker-003:section:0000",
+        "docker-003:section:0003",
+        "docker-003:section:0006"
+      ],
+      "reranked_ids": [
+        "docker-003:section:0003",
+        "docker-003:section:0000",
+        "docker-003:section:0013",
+        "docker-003:section:0014",
+        "docker-001:section:0012"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 130.7260594330728
+    },
+    {
+      "id": "d6-024",
+      "baseline_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0049",
+        "qdrant-004:section:0018",
+        "qdrant-004:section:0031",
+        "qdrant-004:section:0035"
+      ],
+      "reranked_ids": [
+        "qdrant-004:section:0033",
+        "qdrant-004:section:0024",
+        "qdrant-004:section:0028",
+        "qdrant-004:section:0031",
+        "qdrant-006:section:0016"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 168.7187599018216
+    },
+    {
+      "id": "d6-025",
+      "baseline_ids": [
+        "nvidia-003:section:0004",
+        "nvidia-003:section:0003",
+        "nvidia-004:section:0006",
+        "nvidia-003:section:0006",
+        "nvidia-003:section:0002"
+      ],
+      "reranked_ids": [
+        "nvidia-003:section:0004",
+        "nvidia-002:section:0001",
+        "nvidia-003:section:0002",
+        "nvidia-003:section:0003",
+        "nvidia-004:section:0006"
+      ],
+      "candidate_recall": 0.3333333333333333,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.5,
+      "reranked_mrr": 0.25,
+      "rerank_ms": 163.69750117883086
+    },
+    {
+      "id": "d6-026",
+      "baseline_ids": [
+        "vllm-001:section:0042",
+        "vllm-001:section:0043",
+        "docker-008:section:0006",
+        "docker-006:section:0000",
+        "docker-001:section:0015"
+      ],
+      "reranked_ids": [
+        "docker-008:section:0004",
+        "docker-003:section:0019",
+        "docker-001:section:0006",
+        "nvidia-001:section:0008",
+        "nvidia-001:section:0009"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 138.03480984643102
+    },
+    {
+      "id": "d6-027",
+      "baseline_ids": [
+        "k8s-006:section:0058",
+        "k8s-006:section:0053",
+        "k8s-006:section:0060",
+        "docker-003:section:0003",
+        "docker-003:section:0010"
+      ],
+      "reranked_ids": [
+        "qdrant-005:section:0010",
+        "qdrant-001:section:0003",
+        "qdrant-002:section:0049",
+        "qdrant-002:section:0048",
+        "docker-003:section:0011"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.5,
+      "rerank_ms": 134.42893885076046
+    },
+    {
+      "id": "d6-028",
+      "baseline_ids": [
+        "vllm-001:section:0009",
+        "pytorch-005:section:0018",
+        "pytorch-005:section:0019",
+        "pytorch-005:section:0026",
+        "pytorch-001:section:0052"
+      ],
+      "reranked_ids": [
+        "pytorch-001:section:0052",
+        "pytorch-005:section:0026",
+        "pytorch-005:section:0018",
+        "pytorch-005:section:0015",
+        "pytorch-001:section:0001"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.2,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 147.66759471967816
+    },
+    {
+      "id": "d6-029",
+      "baseline_ids": [
+        "pytorch-001:section:0001",
+        "nvidia-003:section:0010",
+        "pytorch-001:section:0013",
+        "pytorch-005:section:0025",
+        "pytorch-001:section:0070"
+      ],
+      "reranked_ids": [
+        "pytorch-001:section:0036",
+        "pytorch-001:section:0013",
+        "pytorch-001:section:0001",
+        "vllm-007:section:0019",
+        "pytorch-001:section:0070"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 146.81644923985004
+    },
+    {
+      "id": "d6-030",
+      "baseline_ids": [
+        "vllm-007:section:0012",
+        "docker-001:section:0016",
+        "vllm-001:section:0000",
+        "vllm-004:section:0004",
+        "vllm-002:section:0003"
+      ],
+      "reranked_ids": [
+        "vllm-006:section:0002",
+        "vllm-002:section:0002",
+        "vllm-001:section:0029",
+        "vllm-004:section:0004",
+        "vllm-001:section:0013"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 148.39288406074047
+    },
+    {
+      "id": "d6-031",
+      "baseline_ids": [
+        "vllm-001:section:0013",
+        "vllm-001:section:0003",
+        "vllm-002:section:0003",
+        "vllm-001:section:0012",
+        "vllm-001:section:0029"
+      ],
+      "reranked_ids": [
+        "vllm-001:section:0012",
+        "vllm-001:section:0029",
+        "vllm-001:section:0036",
+        "vllm-006:section:0002",
+        "vllm-001:section:0009"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 170.0971769168973
+    },
+    {
+      "id": "d6-032",
+      "baseline_ids": [
+        "fastapi-004:section:0036",
+        "fastapi-004:section:0029",
+        "fastapi-003:section:0000",
+        "fastapi-004:section:0021",
+        "fastapi-004:section:0000"
+      ],
+      "reranked_ids": [
+        "fastapi-004:section:0000",
+        "fastapi-003:section:0000",
+        "fastapi-004:section:0036",
+        "fastapi-003:section:0007",
+        "fastapi-004:section:0021"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 135.05276525393128
+    },
+    {
+      "id": "d6-033",
+      "baseline_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-004:section:0010",
+        "qdrant-005:section:0010",
+        "qdrant-004:section:0009",
+        "qdrant-004:section:0035"
+      ],
+      "reranked_ids": [
+        "qdrant-004:section:0010",
+        "qdrant-002:section:0030",
+        "qdrant-002:section:0023",
+        "qdrant-004:section:0019",
+        "qdrant-004:section:0031"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 175.81984493881464
+    },
+    {
+      "id": "d6-034",
+      "baseline_ids": [
+        "qdrant-001:section:0003",
+        "qdrant-005:section:0010",
+        "qdrant-006:section:0028",
+        "qdrant-002:section:0023",
+        "qdrant-004:section:0035"
+      ],
+      "reranked_ids": [
+        "qdrant-004:section:0049",
+        "qdrant-004:section:0018",
+        "qdrant-002:section:0047",
+        "qdrant-004:section:0024",
+        "qdrant-004:section:0031"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 170.99090898409486
+    },
+    {
+      "id": "d6-035",
+      "baseline_ids": [
+        "nvidia-004:section:0006",
+        "nvidia-001:section:0000",
+        "nvidia-002:section:0000",
+        "nvidia-003:section:0006",
+        "nvidia-004:section:0007"
+      ],
+      "reranked_ids": [
+        "nvidia-004:section:0006",
+        "nvidia-004:section:0007",
+        "nvidia-005:section:0001",
+        "nvidia-001:section:0013",
+        "nvidia-005:section:0007"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 1.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 140.2516746893525
+    },
+    {
+      "id": "d6-036",
+      "baseline_ids": [
+        "pytorch-004:section:0008",
+        "pytorch-004:section:0029",
+        "pytorch-004:section:0009",
+        "pytorch-005:section:0009",
+        "vllm-001:section:0024"
+      ],
+      "reranked_ids": [
+        "pytorch-004:section:0008",
+        "pytorch-004:section:0030",
+        "pytorch-004:section:0020",
+        "pytorch-004:section:0029",
+        "pytorch-004:section:0021"
+      ],
+      "candidate_recall": 1.0,
+      "baseline_hit": 1.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 1.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 146.16095507517457
+    },
+    {
+      "id": "d6-037",
+      "baseline_ids": [
+        "qdrant-004:section:0014",
+        "qdrant-004:section:0015",
+        "qdrant-004:section:0017",
+        "qdrant-002:section:0005",
+        "qdrant-004:section:0013"
+      ],
+      "reranked_ids": [
+        "qdrant-004:section:0023",
+        "qdrant-004:section:0010",
+        "qdrant-004:section:0015",
+        "qdrant-004:section:0017",
+        "qdrant-004:section:0027"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 175.18779495730996
+    },
+    {
+      "id": "d6-038",
+      "baseline_ids": [
+        "docker-003:section:0011",
+        "docker-003:section:0024",
+        "docker-003:section:0023",
+        "qdrant-001:section:0003",
+        "qdrant-002:section:0048"
+      ],
+      "reranked_ids": [
+        "docker-003:section:0011",
+        "docker-003:section:0013",
+        "docker-003:section:0014",
+        "docker-003:section:0000",
+        "docker-003:section:0024"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 159.05405906960368
+    },
+    {
+      "id": "d6-039",
+      "baseline_ids": [
+        "vllm-002:section:0003",
+        "vllm-001:section:0009",
+        "k8s-004:section:0008",
+        "vllm-001:section:0000",
+        "k8s-003:section:0035"
+      ],
+      "reranked_ids": [
+        "vllm-006:section:0002",
+        "vllm-001:section:0029",
+        "vllm-007:section:0017",
+        "vllm-001:section:0009",
+        "vllm-002:section:0003"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 0.0,
+      "reranked_hit": 1.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 1.0,
+      "rerank_ms": 153.4845898859203
+    },
+    {
+      "id": "d6-040",
+      "baseline_ids": [
+        "docker-003:section:0035",
+        "k8s-007:section:0027",
+        "pytorch-004:section:0029",
+        "k8s-007:section:0028",
+        "pytorch-005:section:0015"
+      ],
+      "reranked_ids": [
+        "vllm-001:section:0010",
+        "pytorch-004:section:0018",
+        "k8s-006:section:0027",
+        "pytorch-004:section:0016",
+        "k8s-006:section:0006"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 131.0690906830132
+    },
+    {
+      "id": "d6-041",
+      "baseline_ids": [
+        "nvidia-001:section:0008",
+        "nvidia-001:section:0009",
+        "nvidia-005:section:0001",
+        "nvidia-001:section:0012",
+        "nvidia-004:section:0006"
+      ],
+      "reranked_ids": [
+        "nvidia-004:section:0006",
+        "nvidia-001:section:0008",
+        "vllm-001:section:0009",
+        "nvidia-005:section:0001",
+        "nvidia-001:section:0009"
+      ],
+      "candidate_recall": 0.5,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 131.29832316190004
+    },
+    {
+      "id": "d6-042",
+      "baseline_ids": [
+        "fastapi-004:section:0007",
+        "fastapi-006:section:0002",
+        "k8s-002:section:0002",
+        "fastapi-004:section:0035",
+        "vllm-007:section:0006"
+      ],
+      "reranked_ids": [
+        "fastapi-003:section:0007",
+        "fastapi-004:section:0036",
+        "fastapi-003:section:0000",
+        "fastapi-004:section:0027",
+        "fastapi-004:section:0029"
+      ],
+      "candidate_recall": 0.0,
+      "baseline_hit": 0.0,
+      "reranked_hit": 0.0,
+      "baseline_mrr": 0.0,
+      "reranked_mrr": 0.0,
+      "rerank_ms": 130.7778600603342
+    }
+  ]
+}

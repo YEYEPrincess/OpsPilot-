@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-13T14:53:49.647302+00:00",
+  "index_version": "bm25-v1",
+  "source_chunks": "data\\processed\\chunks_section.jsonl",
+  "source_sha256": "c55fdcb70ee7c51cb528b3501e63128a6b88e93461b884a6a0316244bb989794",
+  "documents": 1042,
+  "index_path": "data\\index\\bm25\\opspilot_bm25_v1.json.gz",
+  "index_sha256": "b8dfb229d434d92f810da3d1e0ebace07b798480d3bdfa7e668f1d14b32aa196"
+}
