@@ -1,0 +1,7 @@
+{
+  "source": "data/processed/chunks_section.jsonl",
+  "sha256": "c55fdcb70ee7c51cb528b3501e63128a6b88e93461b884a6a0316244bb989794",
+  "chunks": 1042,
+  "dimension": 384,
+  "provider": "hash-v1"
+}

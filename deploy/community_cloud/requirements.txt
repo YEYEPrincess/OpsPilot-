@@ -1,0 +1,9 @@
+# This file sits beside the Community Cloud entrypoint so the full training
+# dependencies in the repository root are not installed for the public demo.
+streamlit==1.61.1
+fastapi==0.141.1
+httpx==0.28.1
+pydantic-settings==2.14.2
+python-dotenv==1.2.2
+qdrant-client==1.19.0
+uvicorn==0.52.1

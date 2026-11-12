@@ -90,10 +90,12 @@ class DemoQueryService:
     )
     cache: dict[str, dict[str, Any]] = field(default_factory=dict)
 
-    async def answer(self, question: str, top_k: int = 5) -> dict[str, Any]:
+    async def answer(
+        self, question: str, top_k: int = 5, *, use_cache: bool = True,
+    ) -> dict[str, Any]:
         started = time.perf_counter()
         key = hashlib.sha256(f"{question}|{top_k}".encode()).hexdigest()
-        if key in self.cache:
+        if use_cache and key in self.cache:
             result = deepcopy(self.cache[key])
             result["cache_hit"] = True
             cache_ms = (time.perf_counter() - started) * 1000
@@ -146,7 +148,8 @@ class DemoQueryService:
                 },
             }
         )
-        self.cache[key] = deepcopy(result)
+        if use_cache:
+            self.cache[key] = deepcopy(result)
         return result
 
     def _retrieve(self, question: str, top_k: int) -> list[dict[str, Any]]:

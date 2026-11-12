@@ -31,11 +31,19 @@ def stable_point_id(chunk_id: str) -> int:
 class QdrantVectorStore:
     """Create a collection, upsert vectors, and execute cosine Top-k queries."""
 
-    def __init__(self, path: str | Path, collection: str, vector_size: int) -> None:
+    def __init__(
+        self, path: str | Path | None, collection: str, vector_size: int,
+        *, url: str = "", api_key: str | None = None,
+    ) -> None:
         self.path = str(path)
         self.collection = collection
         self.vector_size = vector_size
-        self.client = QdrantClient(path=self.path)
+        if url:
+            self.client = QdrantClient(url=url, api_key=api_key or None, timeout=10)
+        elif path is not None:
+            self.client = QdrantClient(path=self.path)
+        else:
+            raise ValueError("A local path or remote URL is required")
 
     def recreate(self) -> None:
         """Drop and recreate the collection so an index build is reproducible."""

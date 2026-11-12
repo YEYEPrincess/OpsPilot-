@@ -7,6 +7,7 @@ import hashlib
 import json
 import time
 import uuid
+from contextlib import aclosing, asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.errors import APIError, ErrorCode
+from app.model_service import ModelQueryService
 from app.schemas import (
     DocumentCreateRequest,
     DocumentResponse,
@@ -24,6 +26,7 @@ from app.schemas import (
     QueryResponse,
 )
 from app.services import DemoQueryService, DocumentRegistry, new_request_id
+from core.model_settings import ModelSettings
 from core.observability import JsonEventLogger, question_fingerprint
 
 
@@ -41,21 +44,44 @@ def error_payload(
 def create_app(
     *,
     ready: bool = True,
-    query_timeout_seconds: float = 30.0,
+    query_timeout_seconds: float | None = None,
+    settings: ModelSettings | None = None,
+    query_service: Any = None,
     log_path: Path | None = None,
 ) -> FastAPI:
     """Application factory keeps tests isolated and model loading explicit."""
+    settings = settings or ModelSettings()
+    owned = query_service is None
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> Any:
+        try:
+            yield
+        finally:
+            if owned and hasattr(application.state.query_service, "aclose"):
+                await application.state.query_service.aclose()
+
     app = FastAPI(
+        lifespan=lifespan,
         title="OpsPilot API",
         version="0.10.0",
         description="Evidence-grounded deployment troubleshooting API",
     )
     app.state.ready = ready
     app.state.registry = DocumentRegistry()
-    app.state.query_service = DemoQueryService(app.state.registry)
+    app.state.query_service = query_service if query_service is not None else (
+        ModelQueryService(settings) if settings.opspilot_mode == "model"
+        else DemoQueryService(app.state.registry)
+    )
     app.state.feedback = []
-    app.state.query_timeout_seconds = query_timeout_seconds
-    app.state.events = JsonEventLogger(log_path)
+    app.state.query_timeout_seconds = (
+        query_timeout_seconds if query_timeout_seconds is not None
+        else settings.request_timeout_seconds
+    )
+    app.state.events = JsonEventLogger(
+        log_path if log_path is not None else settings.event_log_path,
+        stdout=settings.log_json_stdout,
+    )
 
     @app.middleware("http")
     async def request_context(request: Request, call_next: Any) -> Any:
@@ -112,7 +138,10 @@ def create_app(
     @app.get("/health/ready", tags=["health"])
     async def readiness() -> dict[str, str]:
         """Readiness prevents traffic before models and indexes are usable."""
-        if not app.state.ready:
+        if not app.state.ready or (
+            hasattr(app.state.query_service, "health")
+            and not await app.state.query_service.health()
+        ):
             raise APIError(
                 ErrorCode.NOT_READY,
                 "Models or indexes are still loading",
@@ -128,7 +157,8 @@ def create_app(
         try:
             async with asyncio.timeout(app.state.query_timeout_seconds):
                 result = await app.state.query_service.answer(
-                    body.question, body.top_k
+                    body.question, body.top_k,
+                        **({} if body.use_cache else {"use_cache": False})
                 )
         except TimeoutError as exc:
             raise APIError(
@@ -145,7 +175,7 @@ def create_app(
             stage_ms=result["timings_ms"],
             token_total=result["token_total"],
             cache_hit=result["cache_hit"],
-            error_type="",
+            error_type=result.get("error_code", ""),
             status=result["status"],
         )
         sources = result["sources"] if body.include_sources else []
@@ -157,6 +187,11 @@ def create_app(
             citations=result.get("citations", []),
             sources=sources,
             timings_ms=result["timings_ms"],
+            cache_hit=result["cache_hit"],
+            degraded=result.get("degraded", False),
+            error_code=result.get("error_code", ""),
+            citation_valid=result.get("citation_valid"),
+            usage=result.get("usage", {}),
         )
 
     @app.post("/v1/query/stream", tags=["query"])
@@ -165,12 +200,55 @@ def create_app(
         if not app.state.ready:
             raise APIError(ErrorCode.NOT_READY, "Service is not ready", 503)
 
+        async def generate_model() -> Any:
+            started = time.perf_counter()
+            try:
+                async with asyncio.timeout(app.state.query_timeout_seconds):
+                    async with aclosing(
+                        app.state.query_service.stream(
+                            body.question, body.top_k,
+                            **({} if body.use_cache else {"use_cache": False}),
+                        )
+                    ) as events:
+                        async for event, data in events:
+                            if event == "meta":
+                                data = {**data, "request_id": request.state.request_id}
+                            elif event == "sources" and not body.include_sources:
+                                data = []
+                            elif event == "result":
+                                app.state.events.emit(
+                                    "query_completed",
+                                    request_id=request.state.request_id,
+                                    **question_fingerprint(body.question),
+                                    latency_ms=round((time.perf_counter() - started) * 1000, 3),
+                                    stage_ms=data["timings_ms"],
+                                    token_total=data["token_total"],
+                                    cache_hit=data["cache_hit"],
+                                    error_type=data.get("error_code", ""),
+                                    status=data["status"], transport="sse",
+                                )
+                                data = QueryResponse(
+                                    **{**data, "request_id": request.state.request_id,
+                                       "sources": data["sources"] if body.include_sources else []}
+                                ).model_dump()
+                            yield _sse(event, data)
+            except TimeoutError:
+                yield _sse("error", {
+                    "error_code": ErrorCode.QUERY_TIMEOUT.value,
+                    "request_id": request.state.request_id,
+                    "discard_partial": True,
+                })
+            except asyncio.CancelledError:
+                app.state.events.emit("stream_cancelled", request_id=request.state.request_id)
+                raise
+
         async def generate() -> Any:
             started = time.perf_counter()
             try:
                 async with asyncio.timeout(app.state.query_timeout_seconds):
                     result = await app.state.query_service.answer(
-                        body.question, body.top_k
+                        body.question, body.top_k,
+                        **({} if body.use_cache else {"use_cache": False})
                     )
             except TimeoutError:
                 yield _sse(
@@ -208,7 +286,7 @@ def create_app(
             )
 
         return StreamingResponse(
-            generate(),
+            generate_model() if hasattr(app.state.query_service, "stream") else generate(),
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )

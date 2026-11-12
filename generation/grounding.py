@@ -109,6 +109,36 @@ class AnswerabilityPolicy:
         )
 
 
+
+class ContextAwareAnswerabilityPolicy(AnswerabilityPolicy):
+    """Versioned diagnostic precheck plus the existing evidence threshold gate."""
+
+    def precheck(self, question: str) -> AnswerabilityDecision | None:
+        from generation.clarification import missing_diagnostic_context
+
+        clean = question.strip()
+        if not clean or (len(clean) <= self.vague_question_max_chars and any(
+            marker in clean for marker in self._vague_markers
+        )):
+            return super().decide(question, [])
+        context = missing_diagnostic_context(clean)
+        if context is None:
+            return None
+        return AnswerabilityDecision(
+            AnswerAction.CLARIFY, "missing_diagnostic_context:" + context.issue,
+            0.0, 0, context.clarification,
+        )
+
+    def decide(self, question: str, evidence: list[dict[str, Any]]) -> AnswerabilityDecision:
+        preliminary = self.precheck(question)
+        if preliminary is not None:
+            return AnswerabilityDecision(
+                preliminary.action, preliminary.reason, _top_score(evidence),
+                len(evidence), preliminary.clarification,
+            )
+        return super().decide(question, evidence)
+
+
 def _top_score(evidence: list[dict[str, Any]]) -> float:
     return max((float(item.get("score", 0.0)) for item in evidence), default=0.0)
 

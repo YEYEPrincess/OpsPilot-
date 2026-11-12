@@ -55,6 +55,7 @@ class JsonEventLogger:
     """Append one JSON object per line so logs remain machine-readable."""
 
     path: Path | None = None
+    stdout: bool = False
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
     def emit(self, event: str, **fields: Any) -> dict[str, Any]:
@@ -63,10 +64,14 @@ class JsonEventLogger:
             "event": event,
             **redact(fields),
         }
-        if self.path is not None:
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            with self._lock, self.path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+        line = json.dumps(record, ensure_ascii=False)
+        with self._lock:
+            if self.path is not None:
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                with self.path.open("a", encoding="utf-8") as handle:
+                    handle.write(line + "\n")
+            if self.stdout:
+                print(line, flush=True)
         return record
 
 

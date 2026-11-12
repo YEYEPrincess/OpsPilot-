@@ -11,6 +11,7 @@ class QueryRequest(BaseModel):
     question: str = Field(min_length=3, max_length=4000)
     top_k: int = Field(default=5, ge=1, le=20)
     include_sources: bool = True
+    use_cache: bool = True
 
 
 class SourceView(BaseModel):
@@ -29,6 +30,11 @@ class QueryResponse(BaseModel):
     citations: list[str] = Field(default_factory=list)
     sources: list[SourceView] = Field(default_factory=list)
     timings_ms: dict[str, float] = Field(default_factory=dict)
+    cache_hit: bool = False
+    degraded: bool = False
+    error_code: str = ""
+    citation_valid: bool | None = None
+    usage: dict[str, int] = Field(default_factory=dict)
 
 
 class DocumentCreateRequest(BaseModel):
