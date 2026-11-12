@@ -1,79 +1,362 @@
 # OpsPilot
 
-面向大模型应用部署场景的、证据可追溯的智能故障诊断 RAG 系统。
+**帮助开发者查官方文档、看故障证据、确定下一步排查方向的大模型部署助手。**
 
-OpsPilot 围绕 Docker、GPU、CUDA、PyTorch、vLLM、FastAPI 和 Qdrant 等技术文档，
-完成文档治理、解析分块、混合检索、Cross-Encoder 重排、引用校验、拒答与追问、
-FastAPI 服务、SSE 流式交互以及结构化可观测性。
+> **版本范围：**本文介绍项目目标、GitHub 基础代码和本地完整实现。本次仅发布 README；真实模型适配、Compose 部署、答案缓存、在线混合检索等扩展及部分已有文件的改动尚未同步到 GitHub。标注“本地扩展”的路径供理解完整项目使用，新克隆仓库暂不包含这些新增文件。公开基础版可先体验 Demo 和已有离线实验；历史本地实测结果不能视为当前 GitHub 版本已具备全部能力。
 
-> 当前进度：已完成 20 天计划中的 Day 1–13。下一阶段为缓存与压测、真实 LLM
-> 接入、Docker/GPU 部署和最终端到端评测。
+## 项目目标与目标用户
 
-## 项目价值
+OpsPilot 的目标用户是**初级 AI 应用开发工程师、算法工程师和运维人员**。他们在部署大模型、RAG 服务或 GPU 推理服务时遇到故障，希望系统基于官方技术文档给出**有引用、可执行、低风险的排查建议**。
 
-- 将“只会回答”的 RAG 扩展为能回答、追问和拒答的安全诊断系统；
-- 同时利用 Dense、BM25 和 RRF，兼顾语义表达与命令、错误码、版本号；
-- 使用 bge-reranker-v2-m3 对候选证据精排，并在 RTX 5090 上完成延迟实验；
-- 为答案返回句子级引用、原文片段和来源地址，便于人工核验；
-- 提供 FastAPI、OpenAPI、Streamlit、SSE、请求 ID、超时和健康检查；
-- 记录脱敏结构化日志及检索、重排、生成、缓存等阶段指标。
+例如，容器为什么启动后就退出？程序为什么找不到 GPU？模型服务为什么超时？用户可以提交问题、错误日志和环境信息，由系统查找相关文档，返回有来源的解释与排查方向；信息不完整时追问，证据不足时明确拒答。
 
-## 系统架构
+| 目标用户 | 常见困难 | 希望得到的帮助 |
+|---|---|---|
+| 初级 AI 应用开发工程师 | 能调用模型，但不熟悉部署环境、容器和接口故障 | 知道先检查哪里、需要提供哪些日志，并能打开官方文档核对 |
+| 算法工程师 | 模型能在实验环境运行，上服务后遇到加载、显存或推理问题 | 区分模型、依赖、硬件和服务配置的问题，找到相关证据 |
+| 运维人员 | 需要处理端口、进程、磁盘、权限与模型服务运行问题 | 获得有依据的检查顺序，减少未经确认就修改环境的风险 |
 
-~~~mermaid
-flowchart LR
-    D["公开技术文档"] --> P["解析、清洗、去重"]
-    P --> C["章节感知 / 固定长度 Chunk"]
-    C --> B["BM25 索引"]
-    C --> V["Embedding + Qdrant"]
-    Q["用户问题"] --> B
-    Q --> V
-    B --> R["RRF 融合 Top-20"]
-    V --> R
-    R --> X["bge-reranker-v2-m3"]
-    X --> G{"可回答性安全门"}
-    G -->|证据充分| L["LLM / 结构化生成"]
-    G -->|信息不完整| A["澄清问题"]
-    G -->|证据不足| F["拒答"]
-    L --> E["句子级引用校验"]
-    E --> API["FastAPI + SSE"]
-    API --> UI["Streamlit 页面"]
-    API --> O["脱敏日志与指标"]
-~~~
+**RAG（检索增强生成）**在这里可以理解为“先查资料，再组织回答”。项目把官方技术文档整理成可检索的知识库，大模型读取检索到的原文后生成回答；这些文档用于检索，并没有用来重新训练大模型。
 
-## 已实现能力
+“可执行、低风险”是排查建议的设计目标：尽量给出能人工核对的检查方向和命令依据。当前引用检查主要验证格式与来源编号，不能保证每个建议都适用于用户机器；系统不会自动登录用户服务器或执行修复命令。
 
-### 数据与知识库
+## 聚焦的六类故障
 
-- 收集并治理公开部署技术文档，记录 URL、产品、许可证和内容哈希；
-- 支持 Markdown、HTML 和 PDF 解析；
-- 完成 Unicode NFKC、控制字符、零宽字符和空白清洗；
-- 提供章节感知与固定长度两种 Chunk 策略；
-- 为 Chunk 保存来源、章节、页码、内容哈希和稳定 ID；
-- 当前成功解析 43 份文档，并记录失败与部分修复案例。
+项目范围控制在以下六类。表中的问题是目标场景示例，具体能否回答取决于已收录的文档、检索结果和用户提供的信息，不能据此认为六类问题都已全面通过验收。
 
-### 检索与重排
+| 故障类型 | 用户可能遇到的现象 | 系统要帮助用户弄清什么 |
+|---|---|---|
+| **Docker 与容器启动故障** | 容器启动后退出、服务在容器里无法访问、挂载或启动配置异常 | 从容器状态、日志、启动命令和挂载配置中确定下一步检查项 |
+| **NVIDIA GPU、驱动与 CUDA 故障** | 程序看不到 GPU、CUDA 初始化失败、容器无法使用显卡 | 区分主机驱动、CUDA/PyTorch 兼容性与容器 GPU 配置问题 |
+| **vLLM 或本地模型加载故障** | 权重路径错误、模型加载失败、显存不足、上下文配置不合适 | 核对模型文件、推理工具支持范围、精度和资源配置 |
+| **FastAPI 模型接口超时与并发问题** | 请求长时间等待、接口超时、并发升高后响应变慢、流式输出中断 | 区分应用处理、网络调用、模型生成和排队耗时，核对超时与并发配置 |
+| **Qdrant 等 RAG 基础设施故障** | 向量数据库连接失败、集合不存在、向量维度不匹配、检索不到证据 | 检查服务、索引、文档入库与检索配置，区分检索问题和生成问题 |
+| **Linux 环境、端口、磁盘和权限问题** | 端口被占用、进程未启动、磁盘空间不足、文件不可读写 | 确认资源、监听地址、运行用户和文件权限等基础条件 |
 
-- HashEmbedding + Qdrant Dense 检索基线；
-- rank-bm25 关键词检索；
-- Reciprocal Rank Fusion（RRF）混合召回；
-- bge-reranker-v2-m3 Cross-Encoder 重排；
-- Recall@k、Hit Rate@k、MRR@k、P50 和 P95 评测；
-- 支持 CPU 与 GPU Reranker 对照实验。
+已有 Kubernetes 文档用于辅助理解相关容器与基础设施场景，不另扩展为第七类通用集群运维产品。
 
-### 安全回答与应用服务
+## 用户如何使用
 
-- answer / clarify / refuse 三态可回答性策略；
-- 证据不足拒答和缺失上下文追问；
-- 检查未知来源 ID 和未引用事实句；
-- Pydantic 请求、响应和错误契约；
-- FastAPI 查询、文档注册、健康检查和用户反馈接口；
-- SSE 流式事件及客户端断开检测；
-- Streamlit 聊天、引用展开和点赞/点踩入口；
-- 请求 ID、超时、缓存命中、Token 和阶段耗时日志；
-- API Key、Authorization、邮箱和原始问题脱敏。
+**输入：**一句问题，以及尽可能完整的错误信息、运行命令、软件版本、部署方式和硬件信息。示例：
+
+> 我在 Linux 中通过 Docker 启动 vLLM，容器启动后退出。启动命令和日志如下……GPU、驱动、CUDA 和 vLLM 版本分别是……应该先检查什么？
+
+**输出有三种状态：**
+
+| 状态 | 用户会看到什么 |
+|---|---|
+| `answer`：回答 | 基于证据的解释或排查建议，带 `[S1]` 等引用编号；可展开原文并打开来源链接 |
+| `clarify`：追问 | 请补充错误日志、版本、启动命令等关键上下文，再继续判断 |
+| `refuse`：拒答 | 明确说明现有证据不足，或模型没有完成可靠回答，暂不给出结论 |
+
+聊天界面使用 Streamlit；后端使用 FastAPI 接收请求。SSE 流式输出让用户边生成边看到文字，但最终仍以引用校验后的结果为准。API 还返回请求 ID、缓存命中、各阶段耗时和错误码，便于定位问题。
+
+阅读导航：[工作流程](#系统怎样工作) · [数据如何处理](#数据目录与处理流程) · [文件做什么](#主要代码和文件说明) · [如何运行](#快速开始) · [实验结果](#关键实验结果)
+
+## 系统怎样工作
+
+系统包含两部分：**离线整理文档**，以及**在线接收问题并查资料回答**。用户每次提问时读取已有索引，不会重新下载和解析全部文档。
+
+```mermaid
+flowchart TB
+    subgraph OFFLINE["离线：把官方文档整理成知识库"]
+        D["来源清单与官方文档"] --> P["下载、解析、清洗、去重"]
+        P --> C["切成带来源的小段落：Chunk"]
+        C --> I["建立向量 / 关键词索引"]
+    end
+    subgraph ONLINE["在线：查证据，再决定如何回应"]
+        Q["用户问题、日志与环境信息"] --> S["FastAPI 组织查询"]
+        S --> R["检索相关段落；按配置进行融合与重排"]
+        I --> R
+        R --> G{"问题与证据是否支持回答？"}
+        G -->|信息不完整| A["追问需要补充的内容"]
+        G -->|证据不足| F["拒绝给出确定结论"]
+        G -->|允许生成| L["调用云端或自部署模型"]
+        L --> V{"引用结构校验"}
+        V -->|通过| O["答案、原文片段与来源链接"]
+        V -->|失败| F
+    end
+    A --> U["聊天页面 / API 响应"]
+    F --> U
+    O --> U
+    S -.-> LOG["请求 ID、缓存、阶段耗时日志"]
+```
+
+图表示主要职责。启用上下文追问策略时，缺少关键信息的问题也可以在检索前就返回追问；成功答案缓存命中时会跳过模型生成。
+
+### 项目已有能力（基础代码及本地扩展）
+
+| 能力 | 通俗解释 | 当前实现 |
+|---|---|---|
+| 数据治理 | 知道资料从哪里来、是否下载成功、是否重复 | 来源清单、下载报告、内容哈希和失败记录 |
+| 检索 | 从大量文档中找出与问题相关的段落 | Qdrant 向量检索、BM25 关键词检索 |
+| 融合与重排 | 合并两种检索结果，再细比哪些段落更相关 | RRF 排名融合、BGE Cross-Encoder 重排 |
+| 回答与保护策略 | 有依据才回答，不明确就追问，证据不足就拒答 | 安全门、上下文检查、引用结构校验和失败降级 |
+| 模型服务接入 | 同一套业务逻辑可调用不同推理服务 | OpenAI 风格云端 API、vLLM、Ollama 异步适配 |
+| 应用与观测 | 用户能操作，开发者能追踪请求 | FastAPI、Streamlit、SSE、答案缓存、JSONL 日志、健康检查 |
+
+当前向量基线是 **hash-v1**：把文本特征转换为固定维度数字，便于离线复现；它没有预训练语义模型的完整理解能力，尤其不擅长跨语言检索。
+
+## 数据目录与处理流程
+
+### `data/` 里保存的是什么？
+
+这里既有**供 RAG 查阅的技术文档和索引**，也有**检查系统效果的题目与实验报告**。这两类数据用途不同，评测答案不会作为用户问题的隐藏提示交给模型。
+
+| 路径 | 内容和格式 | 用途 |
+|---|---|---|
+| `data/raw/` | 按产品分目录的原始网页或文档快照；现有本地文件为 HTML、Markdown、TXT | 保留下载时的原貌，方便重新解析和追溯 |
+| `data/manifest/source_catalog.csv` | 文档来源表：ID、产品、主题、标题、URL、语言、许可依据等 | 决定从哪里收集资料 |
+| `data/manifest/download_report.csv` | 每份文档的状态码、下载时间、文件路径、哈希、错误和重复标记 | 检查下载是否成功，解释缺失或异常数据 |
+| `data/manifest/collection_summary.json` | 采集数量、产品分布、失败和快照复用统计 | 查看一次采集的整体情况 |
+| `data/manifest/parse_failure_cases.jsonl` | 解析及采集问题的案例和处理记录 | 保留占位页、格式识别等问题的诊断依据 |
+| `data/processed/documents.jsonl` | 统一格式的文档：标题、来源、章节正文、哈希等 | 把不同文件格式整理成同一种数据结构 |
+| `data/processed/chunks_fixed.jsonl` | 按固定长度窗口切出的文本段落 | 作为分块方法对比基线 |
+| `data/processed/chunks_section.jsonl` | 按章节切出的文本段落，超长章节再切分 | 当前主要建库输入；每段带正文、来源和段落 ID |
+| `data/manifest/parse_stats.json` | 解析成功数、章节数、两种分块数量和长度统计 | 检查处理结果和复现实验参数 |
+| `data/index/qdrant/` | Qdrant 本地数据库文件，保存向量及对应段落信息 | 本地模式的向量检索；Compose 中的 Qdrant 服务使用独立数据卷 |
+| `data/index/bm25/opspilot_bm25_v1.json.gz` | gzip 压缩的 JSON，保存分词结果和段落信息；加载时恢复 BM25 统计量 | 关键词检索 |
+| `data/manifest/vector_index.json`、`bm25_index.json` | 索引名称、位置、输入文件、维度或文件哈希等元数据 | 确认代码加载的是哪一版索引；它们不是模型权重 |
+| `data/eval/day6_eval.jsonl` | 人工整理的 60 条问题，含回答类型、参考证据、检查点和数据划分 | 评测检索与回答策略；另有同名 JSON 导出便于整体查看 |
+| `data/eval/day10_grounding_cases.jsonl` | 18 条受控题，含预期动作与检索分数 | 校准和检查回答、追问、拒答策略 |
+| `data/eval/*results*.json`、`*comparison*.json`、`completion_*.json` 等 | 质量、延迟、用量、运行配置和逐请求结果 | 保存实验的实际结果，不能当作知识库正文 |
+
+格式可以这样理解：**CSV** 是可用表格软件查看的行列表；**JSON** 是带字段名的结构化数据；**JSONL** 是每行一个独立 JSON 对象，适合逐条处理大量文档；**JSON.GZ** 是压缩后的 JSON。技术说明保存在 Markdown（`.md`）中，数据库索引则应通过相应工具读取。
+
+### 官方文档如何变成可检索证据？
+
+1. **登记来源。** 在 `source_catalog.csv` 列出 Docker、NVIDIA Container Toolkit、PyTorch、vLLM、FastAPI、Qdrant 等官方资料，同时记录许可和来源信息。
+2. **下载与审计。** `scripts/collect_docs.py` 保存原始快照，并记录状态码、内容哈希和下载异常。哈希可理解为文件的“指纹”，用于判断内容是否改变或重复。
+3. **解析与清洗。** `scripts/parse_docs.py` 提取标题、正文、章节和可用页码；去除网页导航、脚本和多余空白，统一字符形式，并按正文哈希去除同一文档内重复章节。解析器也支持文本型 PDF；扫描图片型 PDF 尚未接入 OCR。
+4. **标准化与分块。** 先生成 `documents.jsonl`，再生成两套 Chunk。默认窗口是 **1600 字符、重叠 240 字符**；章节策略尽量不跨章节，只在长章节内部使用滑动窗口。这里计量的是字符，不是模型 token。
+5. **建立索引。** `build_vector_index.py` 将段落编码后写入 Qdrant；`build_bm25_index.py` 将章节标题与正文分词，建立关键词检索所需数据。
+6. **在线引用。** 问题到来时检索相关 Chunk，将原文交给生成模型；答案中的 `[S1]` 等编号指向本次返回的证据，用户可以追溯到原始 URL。
+
+已保存的数据快照统计为：**44 条来源记录 → 43 份成功解析文档 → 765 个章节 → 1042 个章节 Chunk**，另有 **688 个固定长度 Chunk**。两种 Chunk 是同一批资料的不同切分方式，不是两批独立文档。[采集统计](data/manifest/collection_summary.json)、[解析统计](data/manifest/parse_stats.json)
+
+43 份解析成功并不表示下载过程没有问题：记录中包含 HTTP 429、无效占位页，以及 6 份可用旧快照的复用。原始目录还可能保留旧文件，因此知识库文档数量应以清单和处理报告为准。
+
+下面是从真实 Chunk 抽取的字段示例，`text` 只展示正文首段：
+
+```json
+{
+  "chunk_id": "docker-006:section:0000",
+  "document_id": "docker-006",
+  "source_url": "https://docs.docker.com/reference/cli/docker/container/logs/",
+  "section_path": ["docker container logs"],
+  "strategy": "section",
+  "page": null,
+  "text": "**Description:** Fetch the logs of a container"
+}
+```
+
+完整 Chunk 还保存字符数、来源哈希和文本哈希等字段。`chunk_id` 标识知识库段落；`[S1]` 是一次回答中的临时引用编号，两者用途不同。
+
+### 知识库与评测数据不要混淆
+
+- **43 份文档 / 1042 个章节 Chunk**：系统回答时检索的资料。
+- **60 条评测问题**：另行建立的检查题，其中 42 条可回答、12 条需要追问、6 条不可回答；划分为 development 36 条、validation 12 条、test 12 条。
+- **历史检索实验的 42 条问题**：使用上述可回答子集计算检索指标，不能当成独立的最终 test 成绩。
+- **Day 10 的 18 条受控题**：另一个策略校准文件，不是技术文档数量，也不等同于 60 条中的全部非直接回答题。
+
+`data/raw/`、`data/processed/`、`data/index/` 的运行产物以及 `models/`、`logs/` 默认被 `.gitignore` 排除。**新克隆仓库不等于已经拥有完整知识库或模型文件**，需要根据来源清单生成数据、准备索引和所选模型。保留的清单与报告用于说明来源、配置和结果。
+
+## 主要代码和文件说明
+
+```text
+opspilot/
+├─ app/           对外接口与一次问答的业务流程
+├─ core/          配置、缓存、日志等公共能力
+├─ retrieval/     找证据：向量、关键词、融合、重排
+├─ generation/    调用模型、组织提示词、追问和引用检查
+├─ evaluation/    计算检索效果指标
+├─ frontend/      用户聊天页面和后端调用客户端
+├─ scripts/       文档处理、建库、查询、测试与实验入口
+├─ tests/         自动化测试
+├─ ingestion/     预留的数据接入包；当前 ETL 实现在 scripts/
+├─ data/          原始资料、清单、处理产物、索引与评测记录
+├─ docs/          设计解释、实验分析和部署操作记录
+├─ deploy/        CPU 模型、混合检索实验和测试镜像的构建文件
+├─ models/        本地模型文件，按需准备，不随 Git 提交
+├─ logs/          运行日志和部分实验输出，不随 Git 提交
+├─ Dockerfile     构建应用镜像
+├─ compose*.yaml  各种服务组合与实验部署配置
+├─ .env.example   配置模板；实际配置保存在本地 .env
+└─ pyproject.toml Python 依赖、打包和测试工具配置
+```
+
+### 应用、模型与检索的主要文件
+
+| 文件 | 主要做什么 |
+|---|---|
+| [`app/main.py`](app/main.py) | 注册查询、流式、健康检查、文档和反馈接口；管理请求 ID、超时与日志 |
+| [`app/schemas.py`](app/schemas.py)、[`app/errors.py`](app/errors.py) | 定义输入输出的字段、类型与错误格式，让前后端遵守同一约定 |
+| [`app/services.py`](app/services.py) | 提供可重复的 Demo 回答，以及内存中的文档注册等功能 |
+| `app/model_service.py`（本地扩展） | 真实模型问答的编排：选择检索器、执行安全门、查缓存、调用模型、检查引用 |
+| `core/model_settings.py`（本地扩展） | 读取并校验模型地址、模式、超时、检索与缓存配置 |
+| `core/answer_cache.py`（本地扩展）、[`core/observability.py`](core/observability.py) | 保存近期已校验答案；记录脱敏 JSON 日志、耗时和缓存命中 |
+| [`retrieval/embeddings.py`](retrieval/embeddings.py) | 把文本编码为向量；包含 hash 基线和可选语义编码器适配 |
+| [`retrieval/qdrant_store.py`](retrieval/qdrant_store.py) | 创建集合、写入向量、检索并取回对应段落信息 |
+| [`retrieval/bm25_store.py`](retrieval/bm25_store.py)、[`retrieval/hybrid_search.py`](retrieval/hybrid_search.py) | BM25 关键词检索，以及用 RRF 合并两个结果排名 |
+| [`retrieval/reranker.py`](retrieval/reranker.py) | 对“问题—候选段落”计算相关性并重新排序，用于重排实验 |
+| `retrieval/hybrid_evidence.py`（本地扩展） | 将 Dense、BM25、RRF、BGE 接成可选在线检索器，并保留各阶段分数和耗时 |
+| `generation/async_client.py`（本地扩展） | 异步调用云端/vLLM/Ollama；解析增量、处理超时重试和模型健康检查 |
+| [`generation/prompt.py`](generation/prompt.py)、[`model_client.py`](generation/model_client.py)、[`rag_pipeline.py`](generation/rag_pipeline.py) | 基础 RAG 与离线实验使用的提示词、模型调用和检索生成流程；真实 HTTP 服务由 `app/model_service.py` 编排 |
+| [`generation/grounding.py`](generation/grounding.py)、`generation/clarification.py`（本地扩展） | 判断回答/追问/拒答，检查引用编号，按配置检查诊断上下文 |
+| [`evaluation/retrieval_metrics.py`](evaluation/retrieval_metrics.py) | 计算 Recall、Hit Rate、MRR 等检索指标 |
+| [`frontend/streamlit_app.py`](frontend/streamlit_app.py)、[`frontend/api_client.py`](frontend/api_client.py) | 聊天输入、流式展示、引用展开、用户反馈，以及调用后端接口 |
+
+### 脚本、配置和说明文档
+
+| 文件或分组 | 主要做什么 |
+|---|---|
+| [`scripts/collect_docs.py`](scripts/collect_docs.py)、[`parse_docs.py`](scripts/parse_docs.py) | 下载官方文档，清洗、去重、分块，输出前面介绍的数据文件 |
+| [`scripts/build_vector_index.py`](scripts/build_vector_index.py)、[`build_bm25_index.py`](scripts/build_bm25_index.py) | 从 Chunk 创建向量和关键词索引 |
+| `scripts/seed_qdrant_service.py`（本地扩展） | 为 Compose 中的 Qdrant 服务初始化索引，并检查已有数据是否匹配 |
+| `scripts/query_*.py`、`scripts/run_rag_smoke.py` | 单次查询或小规模冒烟检查，便于观察检索和生成过程 |
+| `scripts/create_day6_eval.py`、`validate_eval_set.py`、`cross_check_day6_evidence.py` | 生成、验证评测题格式并核对参考证据 |
+| `scripts/evaluate_*.py` | 对检索、混合召回、重排、安全门或追问策略开展对照评测 |
+| `scripts/verify_live_model.py`（本地扩展）、`scripts/benchmark_live_api.py`（本地扩展） | 真实模型端到端验收，以及指定请求数和并发数的性能实验 |
+| `scripts/record_*.py`、`collect_local_resources.py`、`monitor_experiment_resources.py` | 记录版本、GPU 或本机资源，保存实验环境信息 |
+| `scripts/full_chain_guard_experiment.py`、`build_*report.py`、`finalize_guard_experiment.py` | 完整链路安全门实验及报告整理 |
+| `scripts/run_*.sh`、`run_day13_observability_demo.py`、`summarize_metrics.py` | 组织 Linux 实验、演示日志并汇总指标 |
+| [`tests/`](tests/) | 验证解析、检索指标、协议、接口、引用、缓存、日志与故障分支；真实模型实验单独运行 |
+| `Dockerfile`（本地扩展）、`requirements-server.txt`（本地扩展） | 构建最小应用运行镜像，安装服务器侧依赖 |
+| `compose.yaml`（本地扩展） | 定义 API、Qdrant、索引初始化及可选模型服务 |
+| `compose.ollama-cpu.yaml`（本地扩展）、`deploy/Dockerfile.ollama-cpu`（本地扩展） | 本机 CPU Ollama 服务及独立应用入口；模型权重由数据卷提供 |
+| `compose.ollama-gpu.yaml`、`compose.yaml` 中的 vLLM profile | GPU 容器配置入口；有配置文件不等于已完成 GPU 容器实机验收 |
+| `compose.hybrid-experiment.yaml`（本地扩展）、`compose.clarify-fix.yaml`（本地扩展） | 显式启用混合重排与上下文追问的实验服务；需要另行准备 BGE 模型和索引 |
+| `deploy/Dockerfile.test`（本地扩展）、`scripts/stage_linux_tests.py`（本地扩展） | 准备独立 Linux 测试环境和只含测试所需文件的挂载目录 |
+| `deploy/Dockerfile.hybrid`（本地扩展） | 构建带重排依赖的实验镜像 |
+| [`.env.example`](.env.example)、[`pyproject.toml`](pyproject.toml)、`uv.lock` | 配置样例、Python 依赖范围与锁定记录 |
+| [`.gitignore`](.gitignore)、`.dockerignore`（本地扩展） | 控制哪些文件不进入 Git 或镜像构建上下文，排除本地密钥和大文件 |
+| [`docs/`](docs/) | 解释“为什么这样设计”、如何复现实验、如何部署和分析失败 |
+
+## 运行模式与部署
+
+### 本地完整实现已经接通哪些路径？
+
+| 模式 / 配置 | 实际行为 | 适合做什么 |
+|---|---|---|
+| `OPSPILOT_MODE=demo` | 使用可重复的示例服务，不调用真实大模型 | 先体验界面、检查 API 和测试契约；不能用于宣称真实回答质量 |
+| `OPSPILOT_MODE=model` + `RETRIEVAL_MODE=baseline` | hash-v1 + Qdrant 包装层检索 → 安全门 → 真实模型 → 引用检查 | 基础真实问答链路；是 model 模式的默认检索配置 |
+| `OPSPILOT_MODE=model` + `RETRIEVAL_MODE=hybrid_rerank` | Dense + BM25 → RRF → BGE 重排 → 安全门 → 真实模型 | 可选混合检索实验链路，需 BM25 索引和本地 BGE 权重 |
+| `CLARIFICATION_POLICY=context_v1` | 在规则安全门基础上加入诊断上下文检查 | 上下文追问实验；未配置时仍使用 `legacy` 策略 |
+
+默认 baseline 会传入问题文本，使用 Qdrant 包装层的向量/词项混合评分；hybrid 路径的 Dense 分支关闭该附加评分，再通过 RRF 融合。不同路径的分数含义不同，阈值和效果需要分别验证。
+
+上述真实服务已由 `ModelQueryService` 接通，无需再等待另一个名为 `ProductionRAGQueryService` 的类。较早文档中的“待接入”属于历史开发阶段，不代表当前代码状态。
+
+### 应用在哪里运行，模型在哪里运行？
+
+| 运行组合 | 应用与检索 | 生成模型 |
+|---|---|---|
+| 本地 RAG + 云端模型 | 本机 FastAPI、Qdrant，可由 Docker Compose 管理 | 调用供应商 API，项目已有 DeepSeek 真实验收记录 |
+| 本地 RAG + 本地模型 | 本机 Compose 管理应用、检索和 Ollama | 本机 CPU 运行 Qwen2.5-1.5B Q4 |
+| 远端 RAG + 远端模型 | 在租用的 Linux GPU 实例直接启动应用与相关进程 | vLLM/Ollama 加载同源 Qwen2.5-1.5B-Instruct，GPU 推理 |
+
+**应用部署位置、模型运行位置、是否容器化是不同维度。** 两个本机聊天页面可以完全相同，只是连接的模型后端不同。远端原生 GPU 实验不等于 GPU Docker Compose 验收。
+
+已有记录：2026-09-27 的 Windows / Linux 自动化测试各 76 项通过；云端 5 项真实验收通过；并发 1 和 4 各 20 次、绕过答案缓存的云端生成均通过引用结构检查。本地小模型的两个应回答用例引用失败，按设计拒答降级。以上是**当时配置下的历史结果**，不是每次启动后的实时状态，也不是最新代码的测试数量。
+
+详细过程见 `docs/部署与模型服务_实现原理与验证.md`（本地扩展）、`docs/model-service-integration.md`（本地扩展）、`docs/wsl-docker-deployment.md`（本地扩展）和 `docs/remote-gpu-verification.md`（本地扩展）。
+
+## 快速开始
+
+Python 版本要求：**3.11 或 3.12**。先用 Demo 验证界面，再准备真实知识库和模型服务。
+
+### 1. 安装项目
+
+使用 uv：
+
+```powershell
+git clone https://github.com/YEYEPrincess/OpsPilot-.git
+cd OpsPilot-
+uv sync --extra dev
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+没有 uv 时，在项目目录执行：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+保留已有 `.env`，不要把真实 API Key 提交到 Git。
+
+### 2. 体验聊天界面
+
+在第一个 PowerShell 终端启动 Demo 后端：
+
+```powershell
+$env:OPSPILOT_MODE='demo'
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+在第二个终端启动前端：
+
+```powershell
+$env:OPSPILOT_API_URL='http://127.0.0.1:8000'
+$env:NO_PROXY='127.0.0.1,localhost,::1'
+.\.venv\Scripts\python.exe -m streamlit run frontend\streamlit_app.py
+```
+
+打开 [聊天界面](http://127.0.0.1:8501) 或 [API 文档](http://127.0.0.1:8000/docs)。这一步用于理解交互，不会调用真实模型。
+
+### 3. 准备真实知识库
+
+以下命令会根据来源清单联网下载资料，并生成本地处理产物与索引。建议在新克隆的工作目录执行；已有知识库使用者应先核对输入和输出位置，避免混用不同版本数据。
+
+```powershell
+.\.venv\Scripts\python.exe scripts/collect_docs.py
+.\.venv\Scripts\python.exe scripts/parse_docs.py
+.\.venv\Scripts\python.exe scripts/build_vector_index.py
+.\.venv\Scripts\python.exe scripts/build_bm25_index.py
+```
+
+每一步完成后先查看 `data/manifest/` 对应报告。网页变化、限流或下载失败可能使新生成的数量与历史的 43 份文档不同，不能直接沿用旧实验成绩。BM25 索引用于关键词 / 混合检索，baseline 不依赖它。
+
+### 4. 接入真实模型或使用容器部署
+
+以下需要尚未同步的本地扩展代码。准备好扩展后，在 `.env` 配置 `OPSPILOT_MODE=model`、`LLM_PROVIDER`、`LLM_BASE_URL`、`LLM_MODEL`，按需填写 `LLM_API_KEY`。如果之前在当前终端设置过 Demo 模式，还需设置 `$env:OPSPILOT_MODE='model'`，因为环境变量优先于 `.env`。
+
+- **云端模型**：应用不需要本地模型权重或 GPU，需可用 API 和完整检索索引。
+- **本地 Ollama**：准备模型文件，按实际硬件使用 CPU 或 GPU。
+- **vLLM / GPU**：准备模型、驱动及兼容依赖，再配置服务地址。
+- **Docker Compose**：参考 `docs/wsl-docker-deployment.md`（本地扩展）。模型权重、数据卷和索引是部署前置条件，Compose 文件本身不包含它们。
+
+前端通过 `OPSPILOT_API_URL` 连接后端。已有本机部署使用云端模式 API `18090`、CPU 模式 API `18091`；这是该部署配置的端口，新克隆仓库不会自动启动这些实例。
+
+### 5. 检查与评测
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m ruff check .
+```
+
+普通测试不下载真实大模型；真实联调使用 `scripts/verify_live_model.py`，并发实验使用 `scripts/benchmark_live_api.py`。它们需要实际运行的服务，可能产生云端调用费用。性能实验默认绕过应用答案缓存。
+
+### API 概览
+
+| 方法与路径 | 作用 |
+|---|---|
+| `GET /health/live` | 检查应用进程是否能响应 |
+| `GET /health/ready` | 检查所选模式的依赖是否就绪；model 模式检查索引与模型服务 |
+| `POST /v1/query` | 返回完整问答结果 |
+| `POST /v1/query/stream` | 返回 SSE 文本增量与最终结果 |
+| `POST /v1/documents` | 注册文档元数据 |
+| `GET /v1/documents` | 列出已注册文档 |
+| `DELETE /v1/documents/{id}` | 删除文档注册记录 |
+| `POST /v1/feedback` | 记录回答反馈 |
+
+文档接口目前使用内存注册表，不会自动完成下载、解析和建库；更新真实知识库仍使用离线数据流程。健康检查成功也不等于生成答案一定合格。
 
 ## 关键实验结果
+
+以下保留已有实验记录，分别衡量“找证据是否准确”“重排是否有效”“服务流程是否正确”。它们不是六类故障的统一解决率，也不能把 Demo、重排阶段和真实生成的耗时直接比较。
 
 ### Dense、BM25 与 Hybrid RRF
 
@@ -110,139 +393,34 @@ RTX 5090、batch_size=4 时，Reranker P95 为 144.090 ms。Candidate Recall@20
 | Day 12 SSE | 20/20 完整，首事件 P95 6.371 ms | 验证传输协议，不是真实 LLM TTFT |
 | Day 13 日志 | 36/36 成功，原始问题未入日志 | 受控重复请求，缓存命中率 91.67% |
 
-## 当前真实模型接入状态
+**指标阅读提示：**Hit@5 表示前五条中命中参考证据的问题比例；MRR@5 关注第一条正确证据排得多靠前；Recall@k 关注找回多少已标注证据。固定候选集合的 Candidate Recall@20 不受重排影响，但重排后的 Top-5 Recall 可以改变。P50 是中位水平，P95 描述较慢的一端，必须同时看测量范围、设备和样本数。
 
-项目已经实现 OpenAI-compatible 模型客户端、结构化 Prompt 和基础 RAG Pipeline，
-但当前 FastAPI 默认使用可重复、CPU-only 的 DemoQueryService，以便稳定测试
-API、流式输出和可观测性。它不是 ChatGPT 或 DeepSeek，也不能代表真实答案质量。
-
-下一阶段会实现 ProductionRAGQueryService，将以下组件接成端到端链路：
-
-~~~text
-Hybrid Top-20
-  -> bge-reranker-v2-m3 Top-5
-  -> 可回答性安全门
-  -> OpenAI / DeepSeek API 或 AutoDL vLLM
-  -> 引用校验
-  -> FastAPI / Streamlit
-~~~
-
-云端 API 不需要本地 GPU；在 AutoDL 自托管开源模型时才需要 GPU。
+GitHub 已有的原始报告见 `data/eval/day8_retrieval_comparison.json`、`day9_reranker_comparison.json`、`day9_reranker_gpu_5090_bs4.json` 和 `day10_grounding_results.json`。真实模型服务结果见 `docs/live-deployment-verification.md`（本地扩展）；历史 RTX 5090 重排与后来 RTX 5090 D 生成实验是不同任务。
 
 ## 技术栈
 
-- Python 3.11
-- FastAPI、Uvicorn、Pydantic、Streamlit、httpx
-- Qdrant、rank-bm25、RRF
-- HashEmbedding 基线、sentence-transformers
-- BAAI/bge-reranker-v2-m3
-- pytest、Ruff、uv
-- 本地 Windows 开发，AutoDL Ubuntu + RTX 5090 GPU 实验
-
-## 项目结构
-
-~~~text
-opspilot/
-├─ app/             # FastAPI 路由、Schema、错误和业务服务
-├─ core/            # 脱敏日志、指标和公共能力
-├─ ingestion/       # 文档解析、清洗和分块
-├─ retrieval/       # Dense、BM25、RRF 和 Reranker
-├─ generation/      # Prompt、模型客户端、RAG、安全门和引用
-├─ evaluation/      # Recall、Hit Rate、MRR 等指标
-├─ frontend/        # Streamlit 页面与 SSE 客户端
-├─ scripts/         # 建库、查询、评测和指标汇总脚本
-├─ tests/           # 单元测试与 API 集成测试
-├─ data/            # 数据清单、Chunk、索引元数据和实验结果
-└─ docs/            # 每日设计说明、需求和 ADR
-~~~
-
-## 快速开始
-
-要求 Python 3.11 或 3.12。
-
-使用 uv：
-
-~~~powershell
-git clone https://github.com/YEYEPrincess/OpsPilot-.git
-cd OpsPilot-
-uv sync --extra dev
-Copy-Item .env.example .env
-~~~
-
-没有 uv 时：
-
-~~~powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -e ".[dev]"
-Copy-Item .env.example .env
-~~~
-
-不要把真实 API Key 提交到 Git。
-
-### 启动 FastAPI
-
-~~~powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-~~~
-
-访问：
-
-- OpenAPI 页面：http://127.0.0.1:8000/docs
-- 存活检查：http://127.0.0.1:8000/health/live
-- 就绪检查：http://127.0.0.1:8000/health/ready
-
-### 启动 Streamlit
-
-另开一个 PowerShell：
-
-~~~powershell
-.\.venv\Scripts\python.exe -m streamlit run frontend\streamlit_app.py
-~~~
-
-浏览器默认打开 http://localhost:8501。
-
-### 运行检查
-
-~~~powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m ruff check .
-~~~
-
-## API 概览
-
-| 方法与路径 | 作用 |
-|---|---|
-| GET /health/live | 检查进程是否存活 |
-| GET /health/ready | 检查模型与索引是否就绪 |
-| POST /v1/query | 返回完整问答结果 |
-| POST /v1/query/stream | 返回 SSE 流式事件 |
-| POST /v1/documents | 注册文档元数据 |
-| GET /v1/documents | 列出已注册文档 |
-| DELETE /v1/documents/{id} | 删除文档注册记录 |
-| POST /v1/feedback | 记录回答反馈 |
-
-当前文档接口使用内存注册表，不会自动完成解析、Embedding 和索引更新。生产版本
-应将入库作为异步离线任务。
+Python 3.11/3.12；FastAPI、Uvicorn、Pydantic、Streamlit、httpx；Qdrant、rank-bm25、RRF；HashEmbedding 基线、sentence-transformers、BGE-Reranker；PyTorch、vLLM、Ollama；pytest、Ruff、uv；Docker Compose、Linux/WSL。
 
 ## 设计与实验文档
 
-- [Day 1：需求与工程决策](docs/day1-design-rationale.md)
-- [Day 2：数据收集与治理](docs/data-governance.md)
+初次阅读可以按“需求 → 数据 → 检索 → 回答策略 → 服务部署”的顺序进行。
+
+- [产品与系统需求](docs/requirements.md)、[Day 1：工程决策](docs/day1-design-rationale.md)
+- [Day 2：数据收集与治理（GitHub 当前版）](https://github.com/YEYEPrincess/OpsPilot-/blob/main/docs/data-governance.md)
 - [Day 3：解析、清洗与分块](docs/day3-design-rationale.md)
 - [Day 4–5：向量检索与基础 RAG](docs/day4-day5-design-rationale.md)
-- [Day 6：评测集与证据标注](docs/day6-评测.md)
-- [Day 7：检索基线](docs/day7-design-rationale.md)
+- [Day 6：评测集与证据标注](docs/day6-评测.md)、[Day 7：检索基线](docs/day7-design-rationale.md)
 - [Day 8–9：混合检索与 Reranker](docs/day8-day9-design-rationale.md)
 - [Day 10：引用、拒答与追问](docs/day10-design-rationale.md)
-- [Day 11：FastAPI 服务化](docs/day11-design-rationale.md)
-- [Day 12：Streamlit 与流式输出](docs/day12-design-rationale.md)
+- [Day 11：FastAPI 服务化](docs/day11-design-rationale.md)、[Day 12：Streamlit 与流式输出](docs/day12-design-rationale.md)
 - [Day 13：日志与可观测性](docs/day13-design-rationale.md)
-- [需求说明](docs/requirements.md)
+- `docs/部署与模型服务_实现原理与验证.md`（本地扩展）
 - [开发与部署环境 ADR](docs/adr/ADR-001-development-and-deployment-environment.md)
 
-## 开发进度
+部分设计文档按开发阶段保留历史状态；理解当前运行方式时，应结合本 README、对应代码配置和带日期的实验报告。
+
+<details>
+<summary>展开查看开发阶段与后续工作</summary>
 
 - [x] Day 1：需求、范围和环境决策
 - [x] Day 2：文档收集、清单和数据治理
@@ -257,27 +435,32 @@ Copy-Item .env.example .env
 - [x] Day 11：FastAPI、Pydantic、错误码和健康检查
 - [x] Day 12：Streamlit、SSE 和反馈
 - [x] Day 13：脱敏日志和关键指标
-- [ ] Day 14：缓存、批处理和并发压测
-- [ ] 真实 LLM 端到端接入与评测
-- [ ] Docker Compose 与 GPU 部署
+- [x] Day 14 部分：真实答案缓存与有限并发生成实验
+- [ ] Day 14 其余：应用动态批处理与完整容量评测
+- [x] 异步模型适配与真实增量转发代码、自动化协议与本机 HTTP 测试
+- [x] DeepSeek 云端真实联调：普通响应、增量响应、引用校验、追问与拒答
+- [x] vLLM/Ollama 真实生成、GPU 资源采样与小规模并发验证（引用失败已记录）
+- [ ] 本地模型引用质量验收、大规模端到端质量与成功回答性能评测
+- [x] WSL / Docker Compose：API、Qdrant、Ollama CPU 模型容器及云端链路
+- [x] 业务 JSONL 日志持久化、实际缓存命中与重启保留验证
+- [x] 远端 vLLM / Ollama 原生 GPU 部署与采样（引用验收失败已记录）
+- [ ] GPU 容器透传及本地模型回答质量达标
 - [ ] 稳定性、成本和最终验收
 
-## 安全边界
+- [x] 可选在线 Hybrid + BGE 检索器与上下文追问实验入口
 
-OpsPilot 只提供基于文档证据的诊断建议，不会自动连接用户服务器或执行运维命令。
-涉及删除、覆盖、权限修改、驱动升级和生产配置变更的操作，必须由用户确认并准备
-回滚方案。日志默认不保存原始问题、API Key 或 Authorization。
+</details>
 
-## 已知限制
+## 使用边界与已知限制
 
-- 当前 Dense 基线是 hash-v1，不具备充分语义和跨语言能力；
-- Candidate Recall@20 仍偏低，应优先升级 Embedding 和召回；
-- FastAPI 默认连接 DemoQueryService，尚未形成真实 LLM 生产闭环；
-- SSE 实验验证的是协议，尚未报告真实模型逐 Token TTFT；
-- 本地 TestClient 延迟不包含网络、网关和 GPU 排队；
-- 文档管理目前是内存注册，不等同于在线增量建库。
+- 项目提供基于资料的诊断辅助，不会自动连接用户服务器、执行命令或修改生产环境。
+- 六类故障是聚焦范围；实际可回答程度受文档覆盖、版本、检索和模型能力影响。证据不足时拒答，并不意味着该问题本身无解。
+- 引用检查验证来源编号和句子引用结构，尚不等于逐条证明证据支持结论，也不是完整的危险命令识别器。
+- 当前 hash-v1 基线语义与跨语言能力有限；候选召回仍有改进空间。混合检索和重排必须显式启用，不能默认认为所有入口都使用它们。
+- 本地小模型已完成真实推理，但历史引用质量验收失败；云端少量用例通过也不能外推为普遍正确率。
+- 缓存、并发与 GPU 数据来自指定配置的小规模实验，没有验证生产容量上限、所有故障类型或 GPU 容器透传。
+- 扫描 PDF 尚无 OCR，文档注册尚无在线自动建库，答案缓存是进程内缓存，不能跨实例共享。
 
 ## License
 
-项目代码按 MIT License 方向维护；正式发布前需补充 LICENSE 文件，并持续确认
-所使用技术文档、Embedding、Reranker 和生成模型的许可要求。
+项目代码按 MIT License 方向维护；正式发布前需补充 LICENSE 文件，并持续确认所使用技术文档、模型和其他依赖的许可要求。文档的许可依据与再分发状态记录在来源清单中。
